@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JD Saver</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="popup-body">
+    <main class="panel">
+      <header class="panel-header">
+        <div>
+          <p class="eyebrow">JD Saver</p>
+          <h1>Save Current JD</h1>
+        </div>
+        <button id="open-options" class="ghost-button" type="button">Settings</button>
+      </header>
+
+      <section class="status-card">
+        <p id="status-text" class="status-text">Preparing extractor...</p>
+      </section>
+
+      <section class="details-card">
+        <dl class="details-list">
+          <div>
+            <dt>Source</dt>
+            <dd id="source-site">-</dd>
+          </div>
+          <div>
+            <dt>Title</dt>
+            <dd id="job-title">-</dd>
+          </div>
+          <div>
+            <dt>Company</dt>
+            <dd id="company">-</dd>
+          </div>
+          <div>
+            <dt>URL</dt>
+            <dd id="job-url">-</dd>
+          </div>
+        </dl>
+      </section>
+
+      <footer class="panel-footer">
+        <button id="save-jd" class="primary-button" type="button" disabled>Save JD</button>
+      </footer>
+    </main>
+
+    <script src="utils.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

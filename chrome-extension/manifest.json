@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "JD Saver for Google Sheets",
+  "description": "Save the current job description page to your own Google Sheet.",
+  "version": "0.1.0",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://script.google.com/*",
+    "https://script.googleusercontent.com/*"
+  ],
+  "action": {
+    "default_title": "JD Saver",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html"
+}

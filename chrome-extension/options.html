@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JD Saver Settings</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="options-body">
+    <main class="settings-shell">
+      <header class="settings-header">
+        <p class="eyebrow">JD Saver</p>
+        <h1>Settings</h1>
+        <p class="helper-text">Provide your own Google Apps Script Web App URL and shared secret.</p>
+      </header>
+
+      <form id="settings-form" class="settings-form">
+        <label class="field">
+          <span>Web App URL</span>
+          <input id="web-app-url" name="webAppUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" required>
+        </label>
+
+        <label class="field">
+          <span>Shared Secret</span>
+          <input id="shared-secret" name="sharedSecret" type="password" placeholder="Your shared secret" required>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary-button" type="submit">Save Settings</button>
+        </div>
+      </form>
+
+      <section class="status-card">
+        <p id="settings-status" class="status-text">Settings have not been saved yet.</p>
+      </section>
+    </main>
+
+    <script src="utils.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>
