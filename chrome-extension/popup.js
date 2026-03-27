@@ -27,6 +27,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     jobUrlEl.textContent = self.JDSaverUtils.shortenUrl(data.job_url);
   }
 
+  function validateExtractedData(data) {
+    const missing = [];
+
+    if (!data || !data.job_url) {
+      missing.push('job_url');
+    }
+    if (!data || !data.job_title) {
+      missing.push('job_title');
+    }
+    if (!data || !data.company) {
+      missing.push('company');
+    }
+    if (!data || !data.jd_text) {
+      missing.push('jd_text');
+    }
+
+    if (missing.length === 0) {
+      return { ok: true };
+    }
+
+    if (missing.length === 1 && missing[0] === 'company') {
+      return {
+        ok: false,
+        message: 'This page does not look like a JD page yet. Company information was not found.',
+      };
+    }
+
+    return {
+      ok: false,
+      message: 'This page does not contain enough JD information to save.',
+    };
+  }
+
   async function getActiveTab() {
     const tabs = await chrome.tabs.query({
       active: true,
@@ -83,6 +116,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (!extractedData) {
       throw new Error('No JD data is available for saving.');
+    }
+
+    const validation = validateExtractedData(extractedData);
+    if (!validation.ok) {
+      throw new Error(validation.message);
     }
 
     const payload = buildPayload(extractedData);
@@ -145,13 +183,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setStatus('Extracting current JD...', '');
     extractedData = await extractCurrentPage(tab.id);
+    renderDetails(extractedData || {});
 
-    if (!extractedData || !extractedData.job_url || !extractedData.job_title || !extractedData.jd_text) {
-      setStatus('Failed to extract JD content from this page.', 'error');
+    const validation = validateExtractedData(extractedData);
+    if (!validation.ok) {
+      setStatus(validation.message, 'error');
       return;
     }
 
-    renderDetails(extractedData);
     saveButton.disabled = false;
     setStatus('Ready to save this JD.', 'success');
   } catch (error) {
