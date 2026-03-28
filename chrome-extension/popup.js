@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function isSaveReady(settingsValue) {
-    return Boolean(settingsValue && settingsValue.spreadsheetId);
+    return Boolean(settingsValue && settingsValue.spreadsheetId && settingsValue.hasGoogleAuth);
   }
 
   function validateExtractedData(data) {
@@ -140,8 +140,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function saveJobData() {
-    if (!isSaveReady(settings)) {
+    if (!settings || !settings.spreadsheetId) {
       throw new Error('Spreadsheet settings are missing. Open Settings first.');
+    }
+
+    if (!settings.hasGoogleAuth) {
+      throw new Error('Google authorization is required before saving JDs.');
     }
 
     if (!extractedData) {
@@ -203,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     settings = await self.JDSaverUtils.getSettings();
-    if (!isSaveReady(settings)) {
+    if (!settings.spreadsheetId) {
       setStatus('Spreadsheet settings are missing. Open Settings to continue.', 'error');
       return;
     }
@@ -224,12 +228,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
-    saveButton.disabled = false;
     if (!self.JDSaverUtils.isOauthConfigured()) {
       setStatus('OAuth client ID is not configured yet. Save flow will not work until manifest.json is updated.', 'error');
       return;
     }
 
+    if (!settings.hasGoogleAuth) {
+      setStatus('Connect Google in Settings before saving JDs.', 'error');
+      saveButton.disabled = true;
+      return;
+    }
+
+    saveButton.disabled = false;
     setStatus('Ready to save this JD.', 'success');
   } catch (error) {
     setStatus(error.message || 'Failed to prepare this page.', 'error');
