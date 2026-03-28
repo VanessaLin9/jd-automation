@@ -5,13 +5,20 @@
   "version": "0.1.0",
   "permissions": [
     "activeTab",
+    "identity",
+    "identity.email",
     "storage",
     "scripting"
   ],
   "host_permissions": [
-    "https://script.google.com/*",
-    "https://script.googleusercontent.com/*"
+    "https://sheets.googleapis.com/*"
   ],
+  "oauth2": {
+    "client_id": "160405257245-pdcmsmttcv12cjjbi3dnkhscmh5ru7s8.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/spreadsheets"
+    ]
+  },
   "action": {
     "default_title": "JD Saver",
     "default_popup": "popup.html"

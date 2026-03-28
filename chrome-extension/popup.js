@@ -95,7 +95,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const timestamp = self.JDSaverUtils.nowIso();
 
     return {
-      secret: settings.sharedSecret,
       record_id: self.JDSaverUtils.createRecordId(),
       saved_at: timestamp,
       queue_status: 'saved',
@@ -113,6 +112,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
   }
 
+  async function verifyWorksheetExists(spreadsheetId, token) {
+    const metadata = await self.JDSaverUtils.getSpreadsheetMetadata(spreadsheetId, token);
+    const titles = Array.isArray(metadata.sheets)
+      ? metadata.sheets.map((sheet) => sheet?.properties?.title).filter(Boolean)
+      : [];
+
+    if (!titles.includes(self.JDSaverUtils.WORKSHEET_NAME)) {
+      throw new Error(`The worksheet ${self.JDSaverUtils.WORKSHEET_NAME} was not found.`);
+    }
+  }
+
+  async function isDuplicateJobUrl(spreadsheetId, jobUrl, token) {
+    const values = await self.JDSaverUtils.getSheetColumnValues(
+      spreadsheetId,
+      self.JDSaverUtils.JOB_URL_COLUMN_RANGE,
+      token
+    );
+
+    return values.some((row, index) => {
+      if (index === 0) {
+        return false;
+      }
+      const value = Array.isArray(row) ? self.JDSaverUtils.trimText(row[0]) : '';
+      return value === self.JDSaverUtils.trimText(jobUrl);
+    });
+  }
+
   async function saveJobData() {
     if (!isSaveReady(settings)) {
       throw new Error('Spreadsheet settings are missing. Open Settings first.');
@@ -128,8 +154,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const payload = buildPayload(extractedData);
-    void payload;
-    throw new Error('Google Sheets API write path has not been implemented yet in v2.');
+    const token = await self.JDSaverUtils.getGoogleAuthToken(true);
+
+    if (!token) {
+      throw new Error('Google authorization did not return an access token.');
+    }
+
+    await verifyWorksheetExists(settings.spreadsheetId, token);
+
+    const duplicate = await isDuplicateJobUrl(settings.spreadsheetId, payload.job_url, token);
+    if (duplicate) {
+      return { status: 'duplicate' };
+    }
+
+    const rowValues = self.JDSaverUtils.buildSheetRowFromPayload(payload);
+    await self.JDSaverUtils.appendSheetRow(settings.spreadsheetId, rowValues, token);
+
+    if (!settings.hasGoogleAuth) {
+      const profile = await self.JDSaverUtils.getConnectedGoogleProfile();
+      await self.JDSaverUtils.saveSettings({
+        hasGoogleAuth: true,
+        connectedGoogleEmail: self.JDSaverUtils.trimText(profile.email),
+      });
+      settings = await self.JDSaverUtils.getSettings();
+    }
+
+    return { status: 'created' };
   }
 
   saveButton.addEventListener('click', async () => {
@@ -175,7 +225,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     saveButton.disabled = false;
-    setStatus('Ready for v2 save flow. Google API write path is the next step.', 'success');
+    if (!self.JDSaverUtils.isOauthConfigured()) {
+      setStatus('OAuth client ID is not configured yet. Save flow will not work until manifest.json is updated.', 'error');
+      return;
+    }
+
+    setStatus('Ready to save this JD.', 'success');
   } catch (error) {
     setStatus(error.message || 'Failed to prepare this page.', 'error');
   }

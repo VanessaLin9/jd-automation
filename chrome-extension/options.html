@@ -67,7 +67,10 @@
           <p class="helper-text">OAuth and direct Sheets API write path will be added in v2.1 implementation.</p>
           <div class="connection-card">
             <p id="auth-status" class="status-text">Google account is not connected yet.</p>
-            <button id="connect-google" class="ghost-button" type="button" disabled>Connect Google</button>
+            <div class="connection-actions">
+              <button id="connect-google" class="ghost-button" type="button">Connect Google</button>
+              <button id="disconnect-google" class="ghost-button" type="button" hidden>Disconnect</button>
+            </div>
           </div>
         </section>
 

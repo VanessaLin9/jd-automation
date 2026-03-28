@@ -231,3 +231,9 @@ input:disabled {
   background: #fffdf8;
   padding: 12px 14px;
 }
+
+.connection-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

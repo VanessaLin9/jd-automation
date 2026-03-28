@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const authStatus = document.getElementById('auth-status');
   const statusText = document.getElementById('settings-status');
   const connectGoogleButton = document.getElementById('connect-google');
+  const disconnectGoogleButton = document.getElementById('disconnect-google');
 
   function setLockedState(isLocked) {
     spreadsheetUrlInput.readOnly = isLocked;
@@ -23,6 +24,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       ? `Connected to Google${settings.connectedGoogleEmail ? ` as ${settings.connectedGoogleEmail}` : ''}.`
       : 'Google account is not connected yet.';
     authStatus.className = settings.hasGoogleAuth ? 'status-text success' : 'status-text';
+    connectGoogleButton.textContent = settings.hasGoogleAuth ? 'Refresh Connection' : 'Connect Google';
+    disconnectGoogleButton.hidden = !settings.hasGoogleAuth;
     setLockedState(settings.spreadsheetLocked);
   }
 
@@ -42,9 +45,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusText.className = 'status-text';
   });
 
-  connectGoogleButton.addEventListener('click', () => {
-    statusText.textContent = 'Google connection will be implemented in the next v2 step.';
-    statusText.className = 'status-text';
+  connectGoogleButton.addEventListener('click', async () => {
+    if (!self.JDSaverUtils.isOauthConfigured()) {
+      statusText.textContent = 'Google OAuth client ID is not configured in manifest.json yet.';
+      statusText.className = 'status-text error';
+      return;
+    }
+
+    connectGoogleButton.disabled = true;
+
+    try {
+      await self.JDSaverUtils.getGoogleAuthToken(true);
+      const profile = await self.JDSaverUtils.getConnectedGoogleProfile();
+
+      await self.JDSaverUtils.saveSettings({
+        hasGoogleAuth: true,
+        connectedGoogleEmail: self.JDSaverUtils.trimText(profile.email),
+      });
+
+      renderSettings(await self.JDSaverUtils.getSettings());
+      statusText.textContent = 'Google account connected successfully.';
+      statusText.className = 'status-text success';
+    } catch (error) {
+      statusText.textContent = error.message || 'Failed to connect Google account.';
+      statusText.className = 'status-text error';
+    } finally {
+      connectGoogleButton.disabled = false;
+    }
+  });
+
+  disconnectGoogleButton.addEventListener('click', async () => {
+    disconnectGoogleButton.disabled = true;
+
+    try {
+      await self.JDSaverUtils.clearGoogleAuth();
+      await self.JDSaverUtils.saveSettings({
+        hasGoogleAuth: false,
+        connectedGoogleEmail: '',
+      });
+      renderSettings(await self.JDSaverUtils.getSettings());
+      statusText.textContent = 'Google account disconnected.';
+      statusText.className = 'status-text success';
+    } catch (error) {
+      statusText.textContent = error.message || 'Failed to disconnect Google account.';
+      statusText.className = 'status-text error';
+    } finally {
+      disconnectGoogleButton.disabled = false;
+    }
   });
 
   form.addEventListener('submit', async (event) => {
