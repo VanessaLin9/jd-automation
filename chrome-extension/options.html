@@ -8,54 +8,55 @@
   </head>
   <body class="options-body">
     <main class="settings-shell">
-      <header class="settings-header">
-        <p class="eyebrow" data-i18n="app.name">JD Saver</p>
-        <h1 data-i18n="settings.title">Settings</h1>
-        <p class="helper-text" data-i18n="settings.subtitle">Use the official template, paste your own Google Sheet URL, and prepare for Google account connection.</p>
+      <header class="settings-header settings-header-card">
+        <div class="settings-header-main">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" class="brand-mark-icon" role="presentation">
+              <path d="M5 4.75A1.75 1.75 0 0 1 6.75 3h6.19c.46 0 .9.18 1.23.51l3.32 3.32c.33.33.51.77.51 1.23v11.19A1.75 1.75 0 0 1 16.25 21h-9.5A1.75 1.75 0 0 1 5 19.25Zm8 0v2.5c0 .41.34.75.75.75h2.5" />
+              <path d="M8 11.25h7.5M8 14.25h7.5M8 17.25h4.5" />
+            </svg>
+          </div>
+          <div class="settings-header-copy">
+            <p class="eyebrow" data-i18n="app.name">JD Saver</p>
+            <h1 data-i18n="settings.title">Settings</h1>
+            <p class="helper-text" data-i18n="settings.subtitle">Use the official template, paste your own Google Sheet URL, and prepare for Google account connection.</p>
+          </div>
+        </div>
+
+        <div class="language-toggle" role="group" aria-label="Language">
+          <button id="language-en" class="language-button" type="button">EN</button>
+          <button id="language-zh-TW" class="language-button" type="button">繁中</button>
+        </div>
       </header>
 
       <form id="settings-form" class="settings-form">
         <section class="settings-section">
           <div class="section-header">
-            <div>
-              <p class="eyebrow" data-i18n="settings.languageLabel">Language</p>
-              <h2 data-i18n="settings.languageLabel">Language</h2>
-            </div>
-          </div>
-
-          <label class="field">
-            <span data-i18n="settings.languageLabel">Language</span>
-            <select id="language-select" name="language"></select>
-          </label>
-
-          <p class="helper-text" data-i18n="settings.languageHelp">Choose the interface language for the extension.</p>
-        </section>
-
-        <section class="settings-section">
-          <div class="section-header">
-            <div>
+            <div class="section-header-copy">
               <p class="eyebrow" data-i18n="settings.step1">Step 1</p>
               <h2 data-i18n="settings.openTemplateTitle">Open Template</h2>
+              <p class="helper-text" data-i18n="settings.openTemplateHelp">Make a copy into your own Google Drive before continuing.</p>
             </div>
-            <a
-              id="template-link"
-              class="ghost-button button-link"
-              href="https://docs.google.com/spreadsheets/d/1Ai0EoNhw1o56FfZjfncs73wMnJ18pn6kFssDA238524/edit?usp=sharing"
-              target="_blank"
-              rel="noreferrer"
-              data-i18n="settings.openTemplateButton"
-            >
-              Open Template
-            </a>
           </div>
-          <p class="helper-text" data-i18n="settings.openTemplateHelp">Make a copy into your own Google Drive before continuing.</p>
+
+          <a
+            id="template-link"
+            class="primary-button button-link section-primary-action"
+            href="https://docs.google.com/spreadsheets/d/1Ai0EoNhw1o56FfZjfncs73wMnJ18pn6kFssDA238524/edit?usp=sharing"
+            target="_blank"
+            rel="noreferrer"
+            data-i18n="settings.openTemplateButton"
+          >
+            Open Template
+          </a>
         </section>
 
         <section class="settings-section">
           <div class="section-header">
-            <div>
+            <div class="section-header-copy">
               <p class="eyebrow" data-i18n="settings.step2">Step 2</p>
               <h2 data-i18n="settings.sheetUrlTitle">Paste Your Google Sheet URL</h2>
+              <p id="spreadsheet-meta" class="helper-text" data-i18n="settings.noSheetSaved">No spreadsheet has been saved yet.</p>
             </div>
             <button id="change-sheet" class="ghost-button" type="button" hidden data-i18n="settings.changeButton">Change</button>
           </div>
@@ -72,34 +73,35 @@
             >
           </label>
 
-          <p id="spreadsheet-meta" class="helper-text" data-i18n="settings.noSheetSaved">No spreadsheet has been saved yet.</p>
+          <label class="field field-secondary">
+            <span data-i18n="settings.savedSpreadsheetId">Saved Spreadsheet ID</span>
+            <input id="spreadsheet-id" name="spreadsheetId" type="text" readonly>
+          </label>
+
+          <div class="form-actions">
+            <button class="primary-button section-primary-action" type="submit" data-i18n="settings.saveButton">Save Settings</button>
+          </div>
         </section>
 
         <section class="settings-section">
           <div class="section-header">
-            <div>
+            <div class="section-header-copy">
               <p class="eyebrow" data-i18n="settings.step3">Step 3</p>
               <h2 data-i18n="settings.googleConnectionTitle">Google Connection</h2>
+              <p class="helper-text" data-i18n="settings.googleConnectionHelp">Connect your Google account so the extension can write directly to your sheet.</p>
             </div>
           </div>
-          <p class="helper-text" data-i18n="settings.googleConnectionHelp">Connect your Google account so the extension can write directly to your sheet.</p>
+
           <div class="connection-card">
-            <p id="auth-status" class="status-text" data-i18n="settings.authDisconnected">Google account is not connected yet.</p>
+            <div class="connection-copy">
+              <p id="auth-status" class="status-text" data-i18n="settings.authDisconnected">Google account is not connected yet.</p>
+            </div>
             <div class="connection-actions">
-              <button id="connect-google" class="ghost-button" type="button" data-i18n="settings.connectGoogle">Connect Google</button>
+              <button id="connect-google" class="primary-button section-primary-action" type="button" data-i18n="settings.connectGoogle">Connect Google</button>
               <button id="disconnect-google" class="ghost-button" type="button" hidden data-i18n="settings.disconnectGoogle">Disconnect</button>
             </div>
           </div>
         </section>
-
-        <label class="field">
-          <span data-i18n="settings.savedSpreadsheetId">Saved Spreadsheet ID</span>
-          <input id="spreadsheet-id" name="spreadsheetId" type="text" readonly>
-        </label>
-
-        <div class="form-actions">
-          <button class="primary-button" type="submit" data-i18n="settings.saveButton">Save Settings</button>
-        </div>
       </form>
 
       <section class="status-card">

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('settings-form');
-  const languageSelect = document.getElementById('language-select');
+  const languageButtons = Array.from(document.querySelectorAll('.language-button'));
   const spreadsheetUrlInput = document.getElementById('spreadsheet-url');
   const spreadsheetIdInput = document.getElementById('spreadsheet-id');
   const spreadsheetMeta = document.getElementById('spreadsheet-meta');
@@ -21,26 +21,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusText.className = tone ? `status-text ${tone}` : 'status-text';
   }
 
-  function populateLanguageOptions(language) {
-    const options = [
-      { value: 'en', label: 'English' },
-      { value: 'zh-TW', label: '繁體中文' },
-    ];
-
-    languageSelect.innerHTML = '';
-    for (const option of options) {
-      const node = document.createElement('option');
-      node.value = option.value;
-      node.textContent = option.label;
-      node.selected = option.value === language;
-      languageSelect.appendChild(node);
-    }
+  function updateLanguageButtons(language) {
+    languageButtons.forEach((button) => {
+      button.classList.toggle('is-active', button.id === `language-${language}`);
+      button.setAttribute('aria-pressed', button.id === `language-${language}` ? 'true' : 'false');
+    });
   }
 
   function applyLanguage(language) {
     currentLanguage = self.JDSaverI18n.normalizeLanguage(language);
     self.JDSaverI18n.applyTranslations(document, currentLanguage);
-    populateLanguageOptions(currentLanguage);
+    updateLanguageButtons(currentLanguage);
   }
 
   function setLockedState(isLocked) {
@@ -75,12 +66,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     setStatus('settings.loaded', 'success');
   }
 
-  languageSelect.addEventListener('change', async () => {
-    const language = self.JDSaverI18n.normalizeLanguage(languageSelect.value);
-    await self.JDSaverUtils.saveSettings({ language });
-    applyLanguage(language);
-    renderSettings(await self.JDSaverUtils.getSettings());
-    setStatus('settings.languageSaved', 'success');
+  languageButtons.forEach((button) => {
+    button.addEventListener('click', async () => {
+      const language = self.JDSaverI18n.normalizeLanguage(button.id.replace('language-', ''));
+      if (language === currentLanguage) {
+        return;
+      }
+
+      await self.JDSaverUtils.saveSettings({ language });
+      applyLanguage(language);
+      renderSettings(await self.JDSaverUtils.getSettings());
+      setStatus('settings.languageSaved', 'success');
+    });
   });
 
   changeSheetButton.addEventListener('click', () => {
