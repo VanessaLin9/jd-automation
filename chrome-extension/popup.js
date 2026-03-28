@@ -27,6 +27,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     jobUrlEl.textContent = self.JDSaverUtils.shortenUrl(data.job_url);
   }
 
+  function isSaveReady(settingsValue) {
+    return Boolean(settingsValue && settingsValue.spreadsheetId);
+  }
+
   function validateExtractedData(data) {
     const missing = [];
 
@@ -110,8 +114,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function saveJobData() {
-    if (!settings || !settings.webAppUrl || !settings.sharedSecret) {
-      throw new Error('Settings are missing. Open Settings first.');
+    if (!isSaveReady(settings)) {
+      throw new Error('Spreadsheet settings are missing. Open Settings first.');
     }
 
     if (!extractedData) {
@@ -124,29 +128,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const payload = buildPayload(extractedData);
-    const response = await fetch(settings.webAppUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-      redirect: 'follow',
-    });
-
-    const rawText = await response.text();
-    let json;
-
-    try {
-      json = JSON.parse(rawText);
-    } catch (error) {
-      throw new Error('Web App did not return JSON.');
-    }
-
-    if (!response.ok || !json.ok) {
-      throw new Error(json && json.error ? json.error : 'Failed to save JD.');
-    }
-
-    return json;
+    void payload;
+    throw new Error('Google Sheets API write path has not been implemented yet in v2.');
   }
 
   saveButton.addEventListener('click', async () => {
@@ -164,14 +147,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
       setStatus(error.message || 'Failed to save JD.', 'error');
     } finally {
-      saveButton.disabled = false;
+      saveButton.disabled = !isSaveReady(settings);
     }
   });
 
   try {
     settings = await self.JDSaverUtils.getSettings();
-    if (!settings.webAppUrl || !settings.sharedSecret) {
-      setStatus('Settings are missing. Open Settings to continue.', 'error');
+    if (!isSaveReady(settings)) {
+      setStatus('Spreadsheet settings are missing. Open Settings to continue.', 'error');
       return;
     }
 
@@ -192,7 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     saveButton.disabled = false;
-    setStatus('Ready to save this JD.', 'success');
+    setStatus('Ready for v2 save flow. Google API write path is the next step.', 'success');
   } catch (error) {
     setStatus(error.message || 'Failed to prepare this page.', 'error');
   }

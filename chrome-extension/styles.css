@@ -104,6 +104,11 @@ h1 {
   gap: 16px;
 }
 
+.settings-section {
+  display: grid;
+  gap: 10px;
+}
+
 .status-text {
   margin: 0;
   color: var(--muted);
@@ -140,6 +145,18 @@ h1 {
   word-break: break-word;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
 .field {
   display: grid;
   gap: 8px;
@@ -162,6 +179,12 @@ input {
 input:focus {
   outline: 2px solid rgba(159, 79, 44, 0.2);
   border-color: var(--accent);
+}
+
+input[readonly],
+input:disabled {
+  background: #f1ede6;
+  color: #756756;
 }
 
 .primary-button,
@@ -190,4 +213,21 @@ input:focus {
 .ghost-button {
   background: var(--panel-strong);
   color: var(--text);
+}
+
+.button-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.connection-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fffdf8;
+  padding: 12px 14px;
 }

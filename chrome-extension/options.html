@@ -11,18 +11,69 @@
       <header class="settings-header">
         <p class="eyebrow">JD Saver</p>
         <h1>Settings</h1>
-        <p class="helper-text">Provide your own Google Apps Script Web App URL and shared secret.</p>
+        <p class="helper-text">Use the official template, paste your own Google Sheet URL, and prepare for Google account connection.</p>
       </header>
 
       <form id="settings-form" class="settings-form">
-        <label class="field">
-          <span>Web App URL</span>
-          <input id="web-app-url" name="webAppUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" required>
-        </label>
+        <section class="settings-section">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Step 1</p>
+              <h2>Open Template</h2>
+            </div>
+            <a
+              id="template-link"
+              class="ghost-button button-link"
+              href="https://docs.google.com/spreadsheets/d/1Ai0EoNhw1o56FfZjfncs73wMnJ18pn6kFssDA238524/edit?usp=sharing"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open Template
+            </a>
+          </div>
+          <p class="helper-text">Make a copy into your own Google Drive before continuing.</p>
+        </section>
+
+        <section class="settings-section">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Step 2</p>
+              <h2>Paste Your Google Sheet URL</h2>
+            </div>
+            <button id="change-sheet" class="ghost-button" type="button" hidden>Change</button>
+          </div>
+
+          <label class="field">
+            <span>Google Sheet URL</span>
+            <input
+              id="spreadsheet-url"
+              name="spreadsheetUrl"
+              type="url"
+              placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+              required
+            >
+          </label>
+
+          <p id="spreadsheet-meta" class="helper-text">No spreadsheet has been saved yet.</p>
+        </section>
+
+        <section class="settings-section">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Step 3</p>
+              <h2>Google Connection</h2>
+            </div>
+          </div>
+          <p class="helper-text">OAuth and direct Sheets API write path will be added in v2.1 implementation.</p>
+          <div class="connection-card">
+            <p id="auth-status" class="status-text">Google account is not connected yet.</p>
+            <button id="connect-google" class="ghost-button" type="button" disabled>Connect Google</button>
+          </div>
+        </section>
 
         <label class="field">
-          <span>Shared Secret</span>
-          <input id="shared-secret" name="sharedSecret" type="password" placeholder="Your shared secret" required>
+          <span>Saved Spreadsheet ID</span>
+          <input id="spreadsheet-id" name="spreadsheetId" type="text" readonly>
         </label>
 
         <div class="form-actions">

@@ -30,11 +30,44 @@
     }
   }
 
+  function isGoogleSheetUrl(value) {
+    try {
+      const url = new URL(value);
+      return (
+        (url.protocol === 'http:' || url.protocol === 'https:') &&
+        url.hostname === 'docs.google.com' &&
+        /^\/spreadsheets\/d\/[^/]+/.test(url.pathname)
+      );
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function parseSpreadsheetId(value) {
+    if (!isGoogleSheetUrl(value)) {
+      return '';
+    }
+
+    const url = new URL(value);
+    const match = url.pathname.match(/^\/spreadsheets\/d\/([^/]+)/);
+    return match ? trimText(match[1]) : '';
+  }
+
   async function getSettings() {
-    const data = await chrome.storage.sync.get(['webAppUrl', 'sharedSecret']);
+    const data = await chrome.storage.sync.get([
+      'spreadsheetUrl',
+      'spreadsheetId',
+      'spreadsheetLocked',
+      'hasGoogleAuth',
+      'connectedGoogleEmail',
+    ]);
+
     return {
-      webAppUrl: trimText(data.webAppUrl),
-      sharedSecret: trimText(data.sharedSecret),
+      spreadsheetUrl: trimText(data.spreadsheetUrl),
+      spreadsheetId: trimText(data.spreadsheetId),
+      spreadsheetLocked: Boolean(data.spreadsheetLocked),
+      hasGoogleAuth: Boolean(data.hasGoogleAuth),
+      connectedGoogleEmail: trimText(data.connectedGoogleEmail),
     };
   }
 
@@ -45,8 +78,10 @@
   self.JDSaverUtils = {
     createRecordId,
     getSettings,
+    isGoogleSheetUrl,
     isValidHttpUrl,
     nowIso,
+    parseSpreadsheetId,
     saveSettings,
     shortenUrl,
     trimText,
