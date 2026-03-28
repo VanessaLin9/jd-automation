@@ -1,25 +1,41 @@
 <!doctype html>
-<html lang="zh-Hant">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JD Saver Settings</title>
+    <title data-i18n="settings.pageTitle">JD Saver Settings</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="options-body">
     <main class="settings-shell">
       <header class="settings-header">
-        <p class="eyebrow">JD Saver</p>
-        <h1>Settings</h1>
-        <p class="helper-text">Use the official template, paste your own Google Sheet URL, and prepare for Google account connection.</p>
+        <p class="eyebrow" data-i18n="app.name">JD Saver</p>
+        <h1 data-i18n="settings.title">Settings</h1>
+        <p class="helper-text" data-i18n="settings.subtitle">Use the official template, paste your own Google Sheet URL, and prepare for Google account connection.</p>
       </header>
 
       <form id="settings-form" class="settings-form">
         <section class="settings-section">
           <div class="section-header">
             <div>
-              <p class="eyebrow">Step 1</p>
-              <h2>Open Template</h2>
+              <p class="eyebrow" data-i18n="settings.languageLabel">Language</p>
+              <h2 data-i18n="settings.languageLabel">Language</h2>
+            </div>
+          </div>
+
+          <label class="field">
+            <span data-i18n="settings.languageLabel">Language</span>
+            <select id="language-select" name="language"></select>
+          </label>
+
+          <p class="helper-text" data-i18n="settings.languageHelp">Choose the interface language for the extension.</p>
+        </section>
+
+        <section class="settings-section">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow" data-i18n="settings.step1">Step 1</p>
+              <h2 data-i18n="settings.openTemplateTitle">Open Template</h2>
             </div>
             <a
               id="template-link"
@@ -27,69 +43,72 @@
               href="https://docs.google.com/spreadsheets/d/1Ai0EoNhw1o56FfZjfncs73wMnJ18pn6kFssDA238524/edit?usp=sharing"
               target="_blank"
               rel="noreferrer"
+              data-i18n="settings.openTemplateButton"
             >
               Open Template
             </a>
           </div>
-          <p class="helper-text">Make a copy into your own Google Drive before continuing.</p>
+          <p class="helper-text" data-i18n="settings.openTemplateHelp">Make a copy into your own Google Drive before continuing.</p>
         </section>
 
         <section class="settings-section">
           <div class="section-header">
             <div>
-              <p class="eyebrow">Step 2</p>
-              <h2>Paste Your Google Sheet URL</h2>
+              <p class="eyebrow" data-i18n="settings.step2">Step 2</p>
+              <h2 data-i18n="settings.sheetUrlTitle">Paste Your Google Sheet URL</h2>
             </div>
-            <button id="change-sheet" class="ghost-button" type="button" hidden>Change</button>
+            <button id="change-sheet" class="ghost-button" type="button" hidden data-i18n="settings.changeButton">Change</button>
           </div>
 
           <label class="field">
-            <span>Google Sheet URL</span>
+            <span data-i18n="settings.sheetUrlLabel">Google Sheet URL</span>
             <input
               id="spreadsheet-url"
               name="spreadsheetUrl"
               type="url"
               placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+              data-i18n-placeholder="settings.sheetUrlPlaceholder"
               required
             >
           </label>
 
-          <p id="spreadsheet-meta" class="helper-text">No spreadsheet has been saved yet.</p>
+          <p id="spreadsheet-meta" class="helper-text" data-i18n="settings.noSheetSaved">No spreadsheet has been saved yet.</p>
         </section>
 
         <section class="settings-section">
           <div class="section-header">
             <div>
-              <p class="eyebrow">Step 3</p>
-              <h2>Google Connection</h2>
+              <p class="eyebrow" data-i18n="settings.step3">Step 3</p>
+              <h2 data-i18n="settings.googleConnectionTitle">Google Connection</h2>
             </div>
           </div>
-          <p class="helper-text">OAuth and direct Sheets API write path will be added in v2.1 implementation.</p>
+          <p class="helper-text" data-i18n="settings.googleConnectionHelp">Connect your Google account so the extension can write directly to your sheet.</p>
           <div class="connection-card">
-            <p id="auth-status" class="status-text">Google account is not connected yet.</p>
+            <p id="auth-status" class="status-text" data-i18n="settings.authDisconnected">Google account is not connected yet.</p>
             <div class="connection-actions">
-              <button id="connect-google" class="ghost-button" type="button">Connect Google</button>
-              <button id="disconnect-google" class="ghost-button" type="button" hidden>Disconnect</button>
+              <button id="connect-google" class="ghost-button" type="button" data-i18n="settings.connectGoogle">Connect Google</button>
+              <button id="disconnect-google" class="ghost-button" type="button" hidden data-i18n="settings.disconnectGoogle">Disconnect</button>
             </div>
           </div>
         </section>
 
         <label class="field">
-          <span>Saved Spreadsheet ID</span>
+          <span data-i18n="settings.savedSpreadsheetId">Saved Spreadsheet ID</span>
           <input id="spreadsheet-id" name="spreadsheetId" type="text" readonly>
         </label>
 
         <div class="form-actions">
-          <button class="primary-button" type="submit">Save Settings</button>
+          <button class="primary-button" type="submit" data-i18n="settings.saveButton">Save Settings</button>
         </div>
       </form>
 
       <section class="status-card">
-        <p id="settings-status" class="status-text">Settings have not been saved yet.</p>
+        <p id="settings-status" class="status-text" data-i18n="settings.notSaved">Settings have not been saved yet.</p>
       </section>
     </main>
 
     <script src="utils.js"></script>
+    <script src="i18n.js"></script>
     <script src="options.js"></script>
   </body>
 </html>

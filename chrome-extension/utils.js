@@ -185,6 +185,7 @@
 
   async function getSettings() {
     const data = await chrome.storage.sync.get([
+      'language',
       'spreadsheetUrl',
       'spreadsheetId',
       'spreadsheetLocked',
@@ -193,6 +194,9 @@
     ]);
 
     return {
+      language: self.JDSaverI18n
+        ? self.JDSaverI18n.normalizeLanguage(data.language)
+        : 'en',
       spreadsheetUrl: trimText(data.spreadsheetUrl),
       spreadsheetId: trimText(data.spreadsheetId),
       spreadsheetLocked: Boolean(data.spreadsheetLocked),

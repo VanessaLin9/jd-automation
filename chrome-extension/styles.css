@@ -176,7 +176,22 @@ input {
   font: inherit;
 }
 
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fffdf8;
+  color: var(--text);
+  font: inherit;
+}
+
 input:focus {
+  outline: 2px solid rgba(159, 79, 44, 0.2);
+  border-color: var(--accent);
+}
+
+select:focus {
   outline: 2px solid rgba(159, 79, 44, 0.2);
   border-color: var(--accent);
 }

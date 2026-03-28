@@ -10,20 +10,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let extractedData = null;
   let settings = null;
+  let currentLanguage = self.JDSaverI18n.DEFAULT_LANGUAGE;
+
+  function t(key, variables) {
+    return self.JDSaverI18n.translate(currentLanguage, key, variables);
+  }
+
+  function applyLanguage(language) {
+    currentLanguage = self.JDSaverI18n.normalizeLanguage(language);
+    self.JDSaverI18n.applyTranslations(document, currentLanguage);
+  }
 
   optionsButton.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
   });
 
-  function setStatus(message, tone) {
-    statusText.textContent = message;
+  function setStatus(messageKey, tone, variables) {
+    statusText.textContent = t(messageKey, variables);
     statusText.className = tone ? `status-text ${tone}` : 'status-text';
   }
 
+  function setErrorStatus(error, fallbackKey) {
+    statusText.textContent = error?.message || t(fallbackKey);
+    statusText.className = 'status-text error';
+  }
+
   function renderDetails(data) {
-    sourceSiteEl.textContent = data.source_site || '-';
-    jobTitleEl.textContent = data.job_title || '-';
-    companyEl.textContent = data.company || '-';
+    sourceSiteEl.textContent = data.source_site || t('common.hyphen');
+    jobTitleEl.textContent = data.job_title || t('common.hyphen');
+    companyEl.textContent = data.company || t('common.hyphen');
     jobUrlEl.textContent = self.JDSaverUtils.shortenUrl(data.job_url);
   }
 
@@ -54,13 +69,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (missing.length === 1 && missing[0] === 'company') {
       return {
         ok: false,
-        message: 'This page does not look like a JD page yet. Company information was not found.',
+        message: t('popup.jdCompanyMissing'),
       };
     }
 
     return {
       ok: false,
-      message: 'This page does not contain enough JD information to save.',
+      message: t('popup.jdInsufficient'),
     };
   }
 
@@ -71,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     if (!tabs.length || !tabs[0].id || !tabs[0].url) {
-      throw new Error('Unable to read the current tab.');
+      throw new Error(t('popup.readTabFailed'));
     }
 
     return tabs[0];
@@ -119,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       : [];
 
     if (!titles.includes(self.JDSaverUtils.WORKSHEET_NAME)) {
-      throw new Error(`The worksheet ${self.JDSaverUtils.WORKSHEET_NAME} was not found.`);
+      throw new Error(t('popup.sheetMissing'));
     }
   }
 
@@ -141,15 +156,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function saveJobData() {
     if (!settings || !settings.spreadsheetId) {
-      throw new Error('Spreadsheet settings are missing. Open Settings first.');
+      throw new Error(t('popup.settingsMissing'));
     }
 
     if (!settings.hasGoogleAuth) {
-      throw new Error('Google authorization is required before saving JDs.');
+      throw new Error(t('popup.authRequired'));
     }
 
     if (!extractedData) {
-      throw new Error('No JD data is available for saving.');
+      throw new Error(t('popup.noData'));
     }
 
     const validation = validateExtractedData(extractedData);
@@ -161,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = await self.JDSaverUtils.getGoogleAuthToken(true);
 
     if (!token) {
-      throw new Error('Google authorization did not return an access token.');
+      throw new Error(t('popup.noToken'));
     }
 
     await verifyWorksheetExists(settings.spreadsheetId, token);
@@ -188,18 +203,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   saveButton.addEventListener('click', async () => {
     saveButton.disabled = true;
-    setStatus('Saving JD...', '');
+    setStatus('popup.saving', '');
 
     try {
       const result = await saveJobData();
 
       if (result.status === 'duplicate') {
-        setStatus('This JD is already saved.', 'success');
+        setStatus('popup.duplicate', 'success');
       } else {
-        setStatus('Saved to Google Sheet.', 'success');
+        setStatus('popup.saved', 'success');
       }
     } catch (error) {
-      setStatus(error.message || 'Failed to save JD.', 'error');
+      setErrorStatus(error, 'popup.saveFailed');
     } finally {
       saveButton.disabled = !isSaveReady(settings);
     }
@@ -207,41 +222,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     settings = await self.JDSaverUtils.getSettings();
+    applyLanguage(settings.language);
+
     if (!settings.spreadsheetId) {
-      setStatus('Spreadsheet settings are missing. Open Settings to continue.', 'error');
+      setStatus('popup.settingsMissingOpen', 'error');
       return;
     }
 
     const tab = await getActiveTab();
     if (!/^https?:/.test(tab.url)) {
-      setStatus('This page type is not supported.', 'error');
+      setStatus('popup.pageTypeUnsupported', 'error');
       return;
     }
 
-    setStatus('Extracting current JD...', '');
+    setStatus('popup.extracting', '');
     extractedData = await extractCurrentPage(tab.id);
     renderDetails(extractedData || {});
 
     const validation = validateExtractedData(extractedData);
     if (!validation.ok) {
-      setStatus(validation.message, 'error');
+      statusText.textContent = validation.message;
+      statusText.className = 'status-text error';
       return;
     }
 
     if (!self.JDSaverUtils.isOauthConfigured()) {
-      setStatus('OAuth client ID is not configured yet. Save flow will not work until manifest.json is updated.', 'error');
+      setStatus('popup.oauthMissing', 'error');
       return;
     }
 
     if (!settings.hasGoogleAuth) {
-      setStatus('Connect Google in Settings before saving JDs.', 'error');
+      setStatus('popup.connectGoogleFirst', 'error');
       saveButton.disabled = true;
       return;
     }
 
     saveButton.disabled = false;
-    setStatus('Ready to save this JD.', 'success');
+    setStatus('popup.ready', 'success');
   } catch (error) {
-    setStatus(error.message || 'Failed to prepare this page.', 'error');
+    setErrorStatus(error, 'popup.prepareFailed');
   }
 });
