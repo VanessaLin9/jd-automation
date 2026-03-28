@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderSettings(settings) {
     spreadsheetUrlInput.value = settings.spreadsheetUrl;
-    spreadsheetIdInput.value = settings.spreadsheetId;
+    spreadsheetIdInput.textContent = settings.spreadsheetId || '-';
     spreadsheetMeta.textContent = settings.spreadsheetId
       ? t('settings.sheetLocked', { spreadsheetId: settings.spreadsheetId })
       : t('settings.noSheetSaved');

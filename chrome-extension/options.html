@@ -8,7 +8,7 @@
   </head>
   <body class="options-body">
     <main class="settings-shell">
-      <header class="settings-header settings-header-card">
+      <header class="settings-header">
         <div class="settings-header-main">
           <div class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" class="brand-mark-icon" role="presentation">
@@ -58,7 +58,6 @@
               <h2 data-i18n="settings.sheetUrlTitle">Paste Your Google Sheet URL</h2>
               <p id="spreadsheet-meta" class="helper-text" data-i18n="settings.noSheetSaved">No spreadsheet has been saved yet.</p>
             </div>
-            <button id="change-sheet" class="ghost-button" type="button" hidden data-i18n="settings.changeButton">Change</button>
           </div>
 
           <label class="field">
@@ -73,13 +72,14 @@
             >
           </label>
 
-          <label class="field field-secondary">
-            <span data-i18n="settings.savedSpreadsheetId">Saved Spreadsheet ID</span>
-            <input id="spreadsheet-id" name="spreadsheetId" type="text" readonly>
-          </label>
+          <div class="inline-meta">
+            <span class="inline-meta-label" data-i18n="settings.savedSpreadsheetId">Saved Spreadsheet ID</span>
+            <code id="spreadsheet-id" class="inline-meta-value">-</code>
+          </div>
 
           <div class="form-actions">
             <button class="primary-button section-primary-action" type="submit" data-i18n="settings.saveButton">Save Settings</button>
+            <button id="change-sheet" class="ghost-button section-secondary-action" type="button" hidden data-i18n="settings.changeButton">Change</button>
           </div>
         </section>
 
@@ -94,6 +94,14 @@
 
           <div class="connection-card">
             <div class="connection-copy">
+              <div class="connection-badge" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="google-badge-icon" role="presentation">
+                  <path fill="#4285F4" d="M21.805 12.23c0-.64-.057-1.253-.163-1.84H12v3.48h5.52a4.72 4.72 0 0 1-2.05 3.1v2.57h3.31c1.94-1.79 3.025-4.43 3.025-7.31Z"/>
+                  <path fill="#34A853" d="M12 22c2.73 0 5.02-.9 6.7-2.46l-3.31-2.57c-.92.62-2.09.99-3.39.99-2.61 0-4.82-1.76-5.61-4.12H3.02v2.59A10 10 0 0 0 12 22Z"/>
+                  <path fill="#FBBC05" d="M6.39 13.84A5.99 5.99 0 0 1 6.07 12c0-.64.11-1.26.32-1.84V7.57H3.02A10 10 0 0 0 2 12c0 1.61.39 3.13 1.02 4.43l3.37-2.59Z"/>
+                  <path fill="#EA4335" d="M12 6.04c1.49 0 2.82.51 3.87 1.52l2.9-2.9C17.01 2.98 14.73 2 12 2a10 10 0 0 0-8.98 5.57l3.37 2.59C7.18 7.8 9.39 6.04 12 6.04Z"/>
+                </svg>
+              </div>
               <p id="auth-status" class="status-text" data-i18n="settings.authDisconnected">Google account is not connected yet.</p>
             </div>
             <div class="connection-actions">
