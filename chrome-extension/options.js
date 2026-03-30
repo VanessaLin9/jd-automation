@@ -2,9 +2,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const form = document.getElementById('settings-form');
   const languageButtons = Array.from(document.querySelectorAll('.language-button'));
   const spreadsheetUrlInput = document.getElementById('spreadsheet-url');
+  const copySheetUrlButton = document.getElementById('copy-sheet-url');
   const spreadsheetIdInput = document.getElementById('spreadsheet-id');
   const spreadsheetMeta = document.getElementById('spreadsheet-meta');
   const changeSheetButton = document.getElementById('change-sheet');
+  const authStatusIcon = document.getElementById('auth-status-icon');
   const authStatus = document.getElementById('auth-status');
   const statusText = document.getElementById('settings-status');
   const connectGoogleButton = document.getElementById('connect-google');
@@ -37,19 +39,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   function setLockedState(isLocked) {
     spreadsheetUrlInput.readOnly = isLocked;
     changeSheetButton.hidden = !isLocked;
+    copySheetUrlButton.hidden = !isLocked;
   }
 
   function renderSettings(settings) {
     spreadsheetUrlInput.value = settings.spreadsheetUrl;
+    copySheetUrlButton.disabled = !settings.spreadsheetUrl;
+    copySheetUrlButton.setAttribute('aria-label', t('settings.copySheetUrl'));
     spreadsheetIdInput.textContent = settings.spreadsheetId || '-';
     spreadsheetMeta.textContent = settings.spreadsheetId
       ? t('settings.sheetLocked', { spreadsheetId: settings.spreadsheetId })
       : t('settings.noSheetSaved');
     authStatus.textContent = settings.hasGoogleAuth
-      ? (settings.connectedGoogleEmail
-        ? t('settings.authConnectedAs', { email: settings.connectedGoogleEmail })
-        : t('settings.authConnected'))
+      ? (settings.connectedGoogleEmail || t('settings.authConnected'))
       : t('settings.authDisconnected');
+    authStatusIcon.hidden = !settings.hasGoogleAuth;
     authStatus.className = settings.hasGoogleAuth ? 'status-text success' : 'status-text';
     connectGoogleButton.textContent = settings.hasGoogleAuth
       ? t('settings.refreshGoogle')
@@ -84,7 +88,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     spreadsheetUrlInput.readOnly = false;
     spreadsheetUrlInput.focus();
     changeSheetButton.hidden = true;
+    copySheetUrlButton.hidden = true;
     setStatus('settings.changeReady', '');
+  });
+
+  copySheetUrlButton.addEventListener('click', async () => {
+    const value = self.JDSaverUtils.trimText(spreadsheetUrlInput.value);
+    if (!value) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(value);
+      setStatus('settings.sheetUrlCopied', 'success');
+    } catch (error) {
+      statusText.textContent = error.message || t('settings.copyFailed');
+      statusText.className = 'status-text error';
+    }
   });
 
   connectGoogleButton.addEventListener('click', async () => {
