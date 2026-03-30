@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const form = document.getElementById('settings-form');
   const languageButtons = Array.from(document.querySelectorAll('.language-button'));
   const spreadsheetUrlInput = document.getElementById('spreadsheet-url');
   const copySheetUrlButton = document.getElementById('copy-sheet-url');
   const spreadsheetIdInput = document.getElementById('spreadsheet-id');
   const spreadsheetMeta = document.getElementById('spreadsheet-meta');
-  const changeSheetButton = document.getElementById('change-sheet');
+  const createSheetButton = document.getElementById('create-sheet');
+  const openSheetButton = document.getElementById('open-sheet');
   const authStatusIcon = document.getElementById('auth-status-icon');
   const authStatus = document.getElementById('auth-status');
   const statusText = document.getElementById('settings-status');
@@ -36,10 +36,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateLanguageButtons(currentLanguage);
   }
 
-  function setLockedState(isLocked) {
-    spreadsheetUrlInput.readOnly = isLocked;
-    changeSheetButton.hidden = !isLocked;
-    copySheetUrlButton.hidden = !isLocked;
+  function setSheetState(hasSheet) {
+    copySheetUrlButton.hidden = !hasSheet;
+    openSheetButton.hidden = !hasSheet;
   }
 
   function renderSettings(settings) {
@@ -59,7 +58,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       ? t('settings.refreshGoogle')
       : t('settings.connectGoogle');
     disconnectGoogleButton.hidden = !settings.hasGoogleAuth;
-    setLockedState(settings.spreadsheetLocked);
+    createSheetButton.textContent = settings.spreadsheetId
+      ? t('settings.createNewSheetButton')
+      : t('settings.openTemplateButton');
+    setSheetState(Boolean(settings.spreadsheetId));
   }
 
   const settings = await self.JDSaverUtils.getSettings();
@@ -84,14 +86,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  changeSheetButton.addEventListener('click', () => {
-    spreadsheetUrlInput.readOnly = false;
-    spreadsheetUrlInput.focus();
-    changeSheetButton.hidden = true;
-    copySheetUrlButton.hidden = true;
-    setStatus('settings.changeReady', '');
-  });
-
   copySheetUrlButton.addEventListener('click', async () => {
     const value = self.JDSaverUtils.trimText(spreadsheetUrlInput.value);
     if (!value) {
@@ -105,6 +99,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       statusText.textContent = error.message || t('settings.copyFailed');
       statusText.className = 'status-text error';
     }
+  });
+
+  openSheetButton.addEventListener('click', async () => {
+    const value = self.JDSaverUtils.trimText(spreadsheetUrlInput.value);
+    if (!value) {
+      setStatus('settings.noSheetSaved', 'error');
+      return;
+    }
+
+    await chrome.tabs.create({ url: value });
   });
 
   connectGoogleButton.addEventListener('click', async () => {
@@ -150,35 +154,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-
-    const spreadsheetUrl = self.JDSaverUtils.trimText(spreadsheetUrlInput.value);
-    if (!self.JDSaverUtils.isGoogleSheetUrl(spreadsheetUrl)) {
-      setStatus('settings.invalidSheetUrl', 'error');
+  createSheetButton.addEventListener('click', async () => {
+    if (!self.JDSaverUtils.isOauthConfigured()) {
+      setStatus('settings.oauthMissing', 'error');
       return;
     }
 
-    const spreadsheetId = self.JDSaverUtils.parseSpreadsheetId(spreadsheetUrl);
-    if (!spreadsheetId) {
-      setStatus('settings.invalidSpreadsheetId', 'error');
+    if (!settings.hasGoogleAuth) {
+      setStatus('settings.createSheetRequiresAuth', 'error');
       return;
     }
 
-    await self.JDSaverUtils.saveSettings({
-      spreadsheetUrl,
-      spreadsheetId,
-      spreadsheetLocked: true,
-      language: currentLanguage,
-    });
+    createSheetButton.disabled = true;
+    setStatus('settings.creatingSheet', '');
 
-    renderSettings({
-      ...(await self.JDSaverUtils.getSettings()),
-      spreadsheetUrl,
-      spreadsheetId,
-      spreadsheetLocked: true,
-    });
+    try {
+      const token = await self.JDSaverUtils.getGoogleAuthToken(true);
+      const createdSheet = await self.JDSaverUtils.createSpreadsheet(
+        token,
+        self.JDSaverUtils.buildSpreadsheetName()
+      );
+      const spreadsheetId = self.JDSaverUtils.trimText(createdSheet.spreadsheetId);
+      const spreadsheetUrl = self.JDSaverUtils.trimText(createdSheet.spreadsheetUrl)
+        || self.JDSaverUtils.getSheetUrlFromId(spreadsheetId);
+      const firstSheetId = createdSheet.sheets?.[0]?.properties?.sheetId;
 
-    setStatus('settings.savedSuccess', 'success');
+      if (typeof firstSheetId !== 'number') {
+        throw new Error(t('settings.createSheetFailed'));
+      }
+
+      await self.JDSaverUtils.setupSpreadsheetTemplate(spreadsheetId, firstSheetId, token);
+
+      await self.JDSaverUtils.saveSettings({
+        spreadsheetUrl,
+        spreadsheetId,
+        language: currentLanguage,
+      });
+
+      const latestSettings = await self.JDSaverUtils.getSettings();
+      Object.assign(settings, latestSettings, {
+        spreadsheetUrl,
+        spreadsheetId,
+      });
+      renderSettings(settings);
+      setStatus('settings.createSheetSuccess', 'success');
+    } catch (error) {
+      statusText.textContent = error.message || t('settings.createSheetFailed');
+      statusText.className = 'status-text error';
+    } finally {
+      createSheetButton.disabled = false;
+    }
   });
 });

@@ -17,6 +17,23 @@
     'agent_queue',
   ];
   const JOB_URL_COLUMN_RANGE = `${WORKSHEET_NAME}!A:A`;
+  const TEMPLATE_COLUMNS = [
+    'Job URL / 職缺網址',
+    'Saved At / 收錄時間',
+    'Record Status / 收錄狀態',
+    'Job Title / 職缺名稱',
+    'Company / 公司',
+    'Location / 地點',
+    'Salary / 薪資',
+    'JD Text / JD 內容',
+    'Industry / 產業',
+    'Source Site / 來源網站',
+    'Applied Date / 投遞日期',
+    'Application Status / 投遞狀態',
+    'Note / 備註',
+    'Agent Queue / Agent 佇列',
+  ];
+  const TEMPLATE_COLUMN_WIDTHS = [280, 180, 170, 240, 200, 160, 140, 320, 160, 150, 150, 190, 220, 210];
 
   function nowIso() {
     return new Date().toISOString();
@@ -93,6 +110,16 @@
     return chrome.runtime.getManifest().oauth2?.scopes || [];
   }
 
+  function getSheetUrlFromId(spreadsheetId) {
+    const trimmed = trimText(spreadsheetId);
+    return trimmed ? `https://docs.google.com/spreadsheets/d/${trimmed}/edit` : '';
+  }
+
+  function buildSpreadsheetName() {
+    const date = new Date().toISOString().slice(0, 10);
+    return `JD Saver - ${date}`;
+  }
+
   async function getGoogleAuthToken(interactive = false) {
     if (!isOauthConfigured()) {
       throw new Error('Google OAuth client ID is not configured in manifest.json.');
@@ -165,6 +192,220 @@
     return data;
   }
 
+  async function createSpreadsheet(token, name = buildSpreadsheetName()) {
+    const url = 'https://sheets.googleapis.com/v4/spreadsheets';
+    const response = await authorizedFetch(url, token, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        properties: {
+          title: name,
+        },
+        sheets: [
+          {
+            properties: {
+              title: WORKSHEET_NAME,
+              gridProperties: {
+                frozenRowCount: 1,
+              },
+            },
+          },
+        ],
+      }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Failed to create your Google Sheet.');
+    }
+
+    return data;
+  }
+
+  async function batchUpdateSpreadsheet(spreadsheetId, requests, token) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}:batchUpdate`;
+    const response = await authorizedFetch(url, token, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ requests }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Failed to configure the spreadsheet template.');
+    }
+
+    return data;
+  }
+
+  async function setupSpreadsheetTemplate(spreadsheetId, sheetId, token) {
+    await updateSheetRow(spreadsheetId, 1, TEMPLATE_COLUMNS, token);
+
+    const requests = [
+      {
+        repeatCell: {
+          range: {
+            sheetId,
+            startRowIndex: 0,
+            endRowIndex: 1,
+          },
+          cell: {
+            userEnteredFormat: {
+              backgroundColor: {
+                red: 0.88,
+                green: 0.91,
+                blue: 0.96,
+              },
+              textFormat: {
+                bold: true,
+                foregroundColor: {
+                  red: 0.18,
+                  green: 0.14,
+                  blue: 0.11,
+                },
+              },
+              verticalAlignment: 'MIDDLE',
+              wrapStrategy: 'WRAP',
+            },
+          },
+          fields: 'userEnteredFormat(backgroundColor,textFormat,verticalAlignment,wrapStrategy)',
+        },
+      },
+      {
+        setBasicFilter: {
+          filter: {
+            range: {
+              sheetId,
+              startRowIndex: 0,
+              startColumnIndex: 0,
+              endColumnIndex: TEMPLATE_COLUMNS.length,
+            },
+          },
+        },
+      },
+      {
+        repeatCell: {
+          range: {
+            sheetId,
+            startColumnIndex: 7,
+            endColumnIndex: 8,
+            startRowIndex: 1,
+          },
+          cell: {
+            userEnteredFormat: {
+              wrapStrategy: 'CLIP',
+            },
+          },
+          fields: 'userEnteredFormat.wrapStrategy',
+        },
+      },
+      {
+        repeatCell: {
+          range: {
+            sheetId,
+            startColumnIndex: 0,
+            endColumnIndex: TEMPLATE_COLUMNS.length,
+            startRowIndex: 1,
+          },
+          cell: {
+            userEnteredFormat: {
+              verticalAlignment: 'MIDDLE',
+            },
+          },
+          fields: 'userEnteredFormat.verticalAlignment',
+        },
+      },
+      {
+        setDataValidation: {
+          range: {
+            sheetId,
+            startColumnIndex: 2,
+            endColumnIndex: 3,
+            startRowIndex: 1,
+          },
+          rule: {
+            condition: {
+              type: 'ONE_OF_LIST',
+              values: [
+                { userEnteredValue: 'saved' },
+                { userEnteredValue: 'archived' },
+                { userEnteredValue: 'skipped' },
+              ],
+            },
+            strict: true,
+            showCustomUi: true,
+          },
+        },
+      },
+      {
+        setDataValidation: {
+          range: {
+            sheetId,
+            startColumnIndex: 11,
+            endColumnIndex: 12,
+            startRowIndex: 1,
+          },
+          rule: {
+            condition: {
+              type: 'ONE_OF_LIST',
+              values: [
+                { userEnteredValue: 'not applied' },
+                { userEnteredValue: 'applied' },
+                { userEnteredValue: 'interviewing' },
+                { userEnteredValue: 'offer' },
+                { userEnteredValue: 'rejected' },
+              ],
+            },
+            strict: true,
+            showCustomUi: true,
+          },
+        },
+      },
+      {
+        setDataValidation: {
+          range: {
+            sheetId,
+            startColumnIndex: 13,
+            endColumnIndex: 14,
+            startRowIndex: 1,
+          },
+          rule: {
+            condition: {
+              type: 'ONE_OF_LIST',
+              values: [
+                { userEnteredValue: 'prepare_to_apply' },
+                { userEnteredValue: 'summarize_jd' },
+                { userEnteredValue: 'archive_record' },
+              ],
+            },
+            strict: true,
+            showCustomUi: true,
+          },
+        },
+      },
+      ...TEMPLATE_COLUMN_WIDTHS.map((pixelSize, index) => ({
+        updateDimensionProperties: {
+          range: {
+            sheetId,
+            dimension: 'COLUMNS',
+            startIndex: index,
+            endIndex: index + 1,
+          },
+          properties: {
+            pixelSize,
+          },
+          fields: 'pixelSize',
+        },
+      })),
+    ];
+
+    await batchUpdateSpreadsheet(spreadsheetId, requests, token);
+  }
+
   function columnLetterFromIndex(index) {
     let current = index;
     let letters = '';
@@ -187,7 +428,6 @@
       'language',
       'spreadsheetUrl',
       'spreadsheetId',
-      'spreadsheetLocked',
       'hasGoogleAuth',
     ]);
 
@@ -197,7 +437,6 @@
         : 'en',
       spreadsheetUrl: trimText(data.spreadsheetUrl),
       spreadsheetId: trimText(data.spreadsheetId),
-      spreadsheetLocked: Boolean(data.spreadsheetLocked),
       hasGoogleAuth: Boolean(data.hasGoogleAuth),
     };
   }
@@ -211,14 +450,18 @@
     JOB_URL_COLUMN_RANGE,
     WORKSHEET_NAME,
     authorizedFetch,
+    batchUpdateSpreadsheet,
+    buildSpreadsheetName,
     buildSheetRowFromPayload,
     clearGoogleAuth,
     columnLetterFromIndex,
     createRecordId,
+    createSpreadsheet,
     getGoogleAuthToken,
     getOauthClientId,
     getOauthScopes,
     getSheetColumnValues,
+    getSheetUrlFromId,
     getSpreadsheetMetadata,
     getSettings,
     isGoogleSheetUrl,
@@ -227,6 +470,7 @@
     nowIso,
     parseSpreadsheetId,
     saveSettings,
+    setupSpreadsheetTemplate,
     shortenUrl,
     trimText,
     updateSheetRow,
