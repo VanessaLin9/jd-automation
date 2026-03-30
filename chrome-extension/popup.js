@@ -110,20 +110,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const timestamp = self.JDSaverUtils.nowIso();
 
     return {
-      record_id: self.JDSaverUtils.createRecordId(),
-      saved_at: timestamp,
-      queue_status: 'saved',
-      source_site: data.source_site || '',
       job_url: data.job_url || '',
+      saved_at: timestamp,
+      record_status: 'saved',
       job_title: data.job_title || '',
       company: data.company || '',
-      industry: data.industry || '',
       location: data.location || '',
       salary_text: data.salary_text || '',
       jd_text: data.jd_text || '',
-      fit_note: '',
-      priority: '',
-      last_updated_at: timestamp,
+      industry: data.industry || '',
+      source_site: data.source_site || '',
+      applied_date: '',
+      application_status: 'not applied',
+      note: '',
+      agent_queue: '',
     };
   }
 

@@ -1,32 +1,22 @@
 (function () {
   const WORKSHEET_NAME = 'JD 收錄池';
   const HEADER_ORDER = [
-    'record_id',
-    'saved_at',
-    'queue_status',
-    'source_site',
     'job_url',
+    'saved_at',
+    'record_status',
     'job_title',
     'company',
-    'industry',
     'location',
     'salary_text',
     'jd_text',
-    'fit_note',
-    'priority',
-    'draft_started_at',
-    'draft_generated_at',
-    'skill_used',
-    'cover_letter_short',
-    'cover_letter_full',
-    'fit_reasons',
-    'gap_notes',
-    'telegram_sent_at',
-    'telegram_message_ref',
-    'error_message',
-    'last_updated_at',
+    'industry',
+    'source_site',
+    'applied_date',
+    'application_status',
+    'note',
+    'agent_queue',
   ];
-  const JOB_URL_COLUMN_RANGE = `${WORKSHEET_NAME}!E:E`;
+  const JOB_URL_COLUMN_RANGE = `${WORKSHEET_NAME}!A:A`;
   const APPEND_RANGE = `${WORKSHEET_NAME}!A1`;
 
   function nowIso() {
