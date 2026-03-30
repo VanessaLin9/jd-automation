@@ -200,15 +200,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rowValues = self.JDSaverUtils.buildSheetRowFromPayload(payload);
     await self.JDSaverUtils.updateSheetRow(settings.spreadsheetId, nextRow, rowValues, token);
 
-    if (!settings.hasGoogleAuth) {
-      const profile = await self.JDSaverUtils.getConnectedGoogleProfile();
-      await self.JDSaverUtils.saveSettings({
-        hasGoogleAuth: true,
-        connectedGoogleEmail: self.JDSaverUtils.trimText(profile.email),
-      });
-      settings = await self.JDSaverUtils.getSettings();
-    }
-
     return { status: 'created' };
   }
 

@@ -6,7 +6,6 @@
   "permissions": [
     "activeTab",
     "identity",
-    "identity.email",
     "storage",
     "scripting"
   ],

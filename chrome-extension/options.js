@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       ? t('settings.sheetLocked', { spreadsheetId: settings.spreadsheetId })
       : t('settings.noSheetSaved');
     authStatus.textContent = settings.hasGoogleAuth
-      ? (settings.connectedGoogleEmail || t('settings.authConnected'))
+      ? t('settings.authConnected')
       : t('settings.authDisconnected');
     authStatusIcon.hidden = !settings.hasGoogleAuth;
     authStatus.className = settings.hasGoogleAuth ? 'status-text success' : 'status-text';
@@ -117,11 +117,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       await self.JDSaverUtils.getGoogleAuthToken(true);
-      const profile = await self.JDSaverUtils.getConnectedGoogleProfile();
 
       await self.JDSaverUtils.saveSettings({
         hasGoogleAuth: true,
-        connectedGoogleEmail: self.JDSaverUtils.trimText(profile.email),
       });
 
       renderSettings(await self.JDSaverUtils.getSettings());
@@ -141,7 +139,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       await self.JDSaverUtils.clearGoogleAuth();
       await self.JDSaverUtils.saveSettings({
         hasGoogleAuth: false,
-        connectedGoogleEmail: '',
       });
       renderSettings(await self.JDSaverUtils.getSettings());
       setStatus('settings.googleDisconnectedSuccess', 'success');

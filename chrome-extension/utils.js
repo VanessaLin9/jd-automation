@@ -106,10 +106,6 @@
     return typeof result === 'string' ? result : result?.token || '';
   }
 
-  async function getConnectedGoogleProfile() {
-    return chrome.identity.getProfileUserInfo();
-  }
-
   async function clearGoogleAuth() {
     await chrome.identity.clearAllCachedAuthTokens();
   }
@@ -193,7 +189,6 @@
       'spreadsheetId',
       'spreadsheetLocked',
       'hasGoogleAuth',
-      'connectedGoogleEmail',
     ]);
 
     return {
@@ -204,7 +199,6 @@
       spreadsheetId: trimText(data.spreadsheetId),
       spreadsheetLocked: Boolean(data.spreadsheetLocked),
       hasGoogleAuth: Boolean(data.hasGoogleAuth),
-      connectedGoogleEmail: trimText(data.connectedGoogleEmail),
     };
   }
 
@@ -221,7 +215,6 @@
     clearGoogleAuth,
     columnLetterFromIndex,
     createRecordId,
-    getConnectedGoogleProfile,
     getGoogleAuthToken,
     getOauthClientId,
     getOauthScopes,
