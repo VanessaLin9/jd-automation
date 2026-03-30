@@ -20,6 +20,74 @@
       .trim();
   }
 
+  function cleanMultilineText(value) {
+    return String(value || '')
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n')
+      .replace(/\u00a0/g, ' ')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n[ \t]+/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  function firstNonEmptyMultiline(...values) {
+    for (const value of values) {
+      const text = cleanMultilineText(value);
+      if (text) {
+        return text;
+      }
+    }
+    return '';
+  }
+
+  function toSingleLineText(value) {
+    return cleanMultilineText(value).replace(/\n+/g, ' | ');
+  }
+
+  function firstNonEmptySingleLine(...values) {
+    for (const value of values) {
+      const text = toSingleLineText(value);
+      if (text) {
+        return text;
+      }
+    }
+    return '';
+  }
+
+  function decodeHtmlEntities(value) {
+    const raw = String(value || '');
+    if (!raw) {
+      return '';
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = raw;
+    return textarea.value;
+  }
+
+  function htmlToText(value) {
+    const raw = decodeHtmlEntities(value).trim();
+    if (!raw) {
+      return '';
+    }
+
+    if (!/[<>&]/.test(raw)) {
+      return cleanMultilineText(raw);
+    }
+
+    const container = document.createElement('div');
+    container.innerHTML = raw
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<\/div>/gi, '\n\n')
+      .replace(/<\/li>/gi, '\n');
+
+    return container.textContent
+      ? cleanMultilineText(container.textContent)
+      : '';
+  }
+
   function firstText(selectors) {
     for (const selector of selectors) {
       const node = document.querySelector(selector);
@@ -160,7 +228,7 @@
         ),
         location: formattedLocations.join(' / '),
         salary_text: salaryText,
-        jd_text: firstNonEmpty(jobPosting.description),
+        jd_text: firstNonEmptySingleLine(htmlToText(jobPosting.description)),
       };
     }
 
@@ -208,10 +276,10 @@
         ]),
         structured.salary_text
       ),
-      jd_text: firstNonEmpty(
-        firstMainText(['.job-description', '.job-detail-box', '.job-content', 'main']),
+      jd_text: firstNonEmptySingleLine(
         structured.jd_text,
-        cleanText(document.body.innerText)
+        firstMainText(['.job-description', '.job-detail-box', '.job-content', 'main']),
+        cleanMultilineText(document.body.innerText)
       ),
     };
   }
@@ -252,10 +320,10 @@
         firstText(['[data-testid="salary-range"]']),
         structured.salary_text
       ),
-      jd_text: firstNonEmpty(
-        firstMainText(['main', '[data-testid="job-description"]', '.job-description']),
+      jd_text: firstNonEmptySingleLine(
         structured.jd_text,
-        cleanText(document.body.innerText)
+        firstMainText(['main', '[data-testid="job-description"]', '.job-description']),
+        cleanMultilineText(document.body.innerText)
       ),
     };
   }
@@ -295,10 +363,10 @@
         ]),
         structured.salary_text
       ),
-      jd_text: firstNonEmpty(
-        firstMainText(['main', 'article', '[role="main"]']),
+      jd_text: firstNonEmptySingleLine(
         structured.jd_text,
-        cleanText(document.body.innerText)
+        firstMainText(['main', 'article', '[role="main"]']),
+        cleanMultilineText(document.body.innerText)
       ),
     };
   }

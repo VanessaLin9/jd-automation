@@ -154,6 +154,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  async function getNextWritableRow(spreadsheetId, token) {
+    const values = await self.JDSaverUtils.getSheetColumnValues(
+      spreadsheetId,
+      self.JDSaverUtils.JOB_URL_COLUMN_RANGE,
+      token
+    );
+
+    return Math.max(values.length + 1, 2);
+  }
+
   async function saveJobData() {
     if (!settings || !settings.spreadsheetId) {
       throw new Error(t('popup.settingsMissing'));
@@ -186,8 +196,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       return { status: 'duplicate' };
     }
 
+    const nextRow = await getNextWritableRow(settings.spreadsheetId, token);
     const rowValues = self.JDSaverUtils.buildSheetRowFromPayload(payload);
-    await self.JDSaverUtils.appendSheetRow(settings.spreadsheetId, rowValues, token);
+    await self.JDSaverUtils.updateSheetRow(settings.spreadsheetId, nextRow, rowValues, token);
 
     if (!settings.hasGoogleAuth) {
       const profile = await self.JDSaverUtils.getConnectedGoogleProfile();

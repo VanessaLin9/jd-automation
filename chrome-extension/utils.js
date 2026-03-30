@@ -17,7 +17,6 @@
     'agent_queue',
   ];
   const JOB_URL_COLUMN_RANGE = `${WORKSHEET_NAME}!A:A`;
-  const APPEND_RANGE = `${WORKSHEET_NAME}!A1`;
 
   function nowIso() {
     return new Date().toISOString();
@@ -149,10 +148,11 @@
     return Array.isArray(data.values) ? data.values : [];
   }
 
-  async function appendSheetRow(spreadsheetId, rowValues, token) {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(APPEND_RANGE)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+  async function updateSheetRow(spreadsheetId, rowNumber, rowValues, token) {
+    const range = `${WORKSHEET_NAME}!A${rowNumber}:${columnLetterFromIndex(HEADER_ORDER.length)}${rowNumber}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
     const response = await authorizedFetch(url, token, {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -163,10 +163,23 @@
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to append data to the spreadsheet.');
+      throw new Error(data.error?.message || 'Failed to write data to the spreadsheet.');
     }
 
     return data;
+  }
+
+  function columnLetterFromIndex(index) {
+    let current = index;
+    let letters = '';
+
+    while (current > 0) {
+      const remainder = (current - 1) % 26;
+      letters = String.fromCharCode(65 + remainder) + letters;
+      current = Math.floor((current - 1) / 26);
+    }
+
+    return letters;
   }
 
   function buildSheetRowFromPayload(payload) {
@@ -200,14 +213,13 @@
   }
 
   self.JDSaverUtils = {
-    APPEND_RANGE,
     HEADER_ORDER,
     JOB_URL_COLUMN_RANGE,
     WORKSHEET_NAME,
-    appendSheetRow,
     authorizedFetch,
     buildSheetRowFromPayload,
     clearGoogleAuth,
+    columnLetterFromIndex,
     createRecordId,
     getConnectedGoogleProfile,
     getGoogleAuthToken,
@@ -224,5 +236,6 @@
     saveSettings,
     shortenUrl,
     trimText,
+    updateSheetRow,
   };
 })();
