@@ -31,6 +31,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function setErrorStatus(error, fallbackKey) {
+    if (self.JDSaverUtils.isAuthCancellationError(error)) {
+      setStatus('popup.googleAuthCanceled', 'error');
+      return;
+    }
+
     statusText.textContent = error?.message || t(fallbackKey);
     statusText.className = 'status-text error';
   }

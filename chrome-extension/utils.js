@@ -185,6 +185,28 @@
     return typeof result === 'string' ? result : result?.token || '';
   }
 
+  function isAuthCancellationError(error) {
+    const message = trimText(error?.message || error).toLowerCase();
+
+    if (!message) {
+      return false;
+    }
+
+    return [
+      'user did not approve access',
+      'the user did not approve access',
+      'the user did not authorize the extension',
+      'access_denied',
+      'user canceled',
+      'user cancelled',
+      'authorization was canceled',
+      'authorization was cancelled',
+      'authorization flow was canceled',
+      'authorization flow was cancelled',
+      'the user aborted the request',
+    ].some((pattern) => message.includes(pattern));
+  }
+
   async function clearGoogleAuth() {
     await chrome.identity.clearAllCachedAuthTokens();
   }
@@ -863,6 +885,7 @@
     getSheetUrlFromId,
     getSpreadsheetMetadata,
     getSettings,
+    isAuthCancellationError,
     isGoogleSheetUrl,
     isOauthConfigured,
     isValidHttpUrl,

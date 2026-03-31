@@ -33,6 +33,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusText.className = tone ? `status-text ${tone}` : 'status-text';
   }
 
+  function setErrorStatus(error, fallbackKey, canceledKey = 'settings.googleSheetActionCanceled') {
+    if (self.JDSaverUtils.isAuthCancellationError(error)) {
+      setStatus(canceledKey, 'error');
+      return;
+    }
+
+    statusText.textContent = error?.message || t(fallbackKey);
+    statusText.className = 'status-text error';
+  }
+
   function updateLanguageButtons(language) {
     languageButtons.forEach((button) => {
       button.classList.toggle('is-active', button.id === `language-${language}`);
@@ -266,8 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       await refreshSettings('settings.refreshSheetsSuccess', 'success');
     } catch (error) {
-      statusText.textContent = error.message || t('settings.refreshSheetsFailed');
-      statusText.className = 'status-text error';
+      setErrorStatus(error, 'settings.refreshSheetsFailed');
     } finally {
       refreshSheetsButton.disabled = false;
     }
@@ -290,8 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       await refreshSettings('settings.googleConnectedSuccess', 'success');
     } catch (error) {
-      statusText.textContent = error.message || t('settings.googleConnectFailed');
-      statusText.className = 'status-text error';
+      setErrorStatus(error, 'settings.googleConnectFailed', 'settings.googleConnectCanceled');
     } finally {
       connectGoogleButton.disabled = false;
     }
@@ -307,8 +315,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       await refreshSettings('settings.googleDisconnectedSuccess', 'success');
     } catch (error) {
-      statusText.textContent = error.message || t('settings.googleDisconnectFailed');
-      statusText.className = 'status-text error';
+      setErrorStatus(error, 'settings.googleDisconnectFailed');
     } finally {
       disconnectGoogleButton.disabled = false;
     }
@@ -366,8 +373,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         spreadsheetName,
       });
     } catch (error) {
-      statusText.textContent = error.message || t('settings.createSheetFailed');
-      statusText.className = 'status-text error';
+      setErrorStatus(error, 'settings.createSheetFailed');
     } finally {
       createSheetButton.disabled = false;
     }
