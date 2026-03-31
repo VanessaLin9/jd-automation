@@ -90,6 +90,10 @@ The extension currently requests the Google scope:
 
 This scope is used so the extension can create and manage spreadsheets that the user chooses to use with JD Saver.
 
+## Google API Services User Data Policy
+
+JD Saver for Google Sheets' use and transfer to any other app of information received from Google APIs will adhere to the Google API Services User Data Policy, including the Limited Use requirements.
+
 ## Chrome extension permissions
 
 The extension currently uses these Chrome permissions:
@@ -226,6 +230,10 @@ extension 透過 Chrome 的 identity API 使用 Google OAuth，讓使用者授�
 - `https://www.googleapis.com/auth/drive.file`
 
 這個 scope 用於讓 extension 建立並管理使用者選擇要搭配 JD Saver 使用的 spreadsheet。
+
+## Google API Services User Data Policy
+
+JD Saver for Google Sheets 對從 Google API 取得資訊的使用與傳輸，將遵守 Google API Services User Data Policy，包括 Limited Use requirements。
 
 ## Chrome extension 權限
 
