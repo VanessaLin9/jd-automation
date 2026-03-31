@@ -180,6 +180,7 @@ h2 {
 .settings-header-copy .helper-text {
   margin-top: 6px;
   max-width: 560px;
+  min-height: 44px;
 }
 
 .settings-form {
