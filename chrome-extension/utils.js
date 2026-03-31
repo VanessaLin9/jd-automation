@@ -115,6 +115,58 @@
     return trimmed ? `https://docs.google.com/spreadsheets/d/${trimmed}/edit` : '';
   }
 
+  function normalizeSheetEntry(entry) {
+    if (!entry || typeof entry !== 'object') {
+      return null;
+    }
+
+    const id = trimText(entry.id || entry.spreadsheetId);
+    if (!id) {
+      return null;
+    }
+
+    const url = trimText(entry.url || entry.spreadsheetUrl) || getSheetUrlFromId(id);
+    return {
+      id,
+      url,
+      name: trimText(entry.name) || `JD Saver - ${id.slice(0, 8)}`,
+    };
+  }
+
+  function buildAvailableSheets(data) {
+    const sheetMap = new Map();
+    const entries = Array.isArray(data.availableSheets) ? data.availableSheets : [];
+
+    entries
+      .map(normalizeSheetEntry)
+      .filter(Boolean)
+      .forEach((entry) => {
+        if (!sheetMap.has(entry.id)) {
+          sheetMap.set(entry.id, entry);
+        }
+      });
+
+    const legacyId = trimText(data.spreadsheetId);
+    if (legacyId && !sheetMap.has(legacyId)) {
+      sheetMap.set(legacyId, {
+        id: legacyId,
+        url: trimText(data.spreadsheetUrl) || getSheetUrlFromId(legacyId),
+        name: `JD Saver - ${legacyId.slice(0, 8)}`,
+      });
+    }
+
+    return Array.from(sheetMap.values());
+  }
+
+  function resolveActiveSheetId(availableSheets, requestedId) {
+    const trimmedId = trimText(requestedId);
+    if (trimmedId && availableSheets.some((sheet) => sheet.id === trimmedId)) {
+      return trimmedId;
+    }
+
+    return availableSheets[0]?.id || '';
+  }
+
   function buildSpreadsheetName() {
     const year = new Date().getFullYear();
     return `JD Saver - ${year}`;
@@ -148,7 +200,7 @@
   }
 
   async function getSpreadsheetMetadata(spreadsheetId, token) {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=sheets.properties.title`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=properties.title,sheets.properties.title`;
     const response = await authorizedFetch(url, token);
     const data = await response.json();
 
@@ -764,18 +816,27 @@
   async function getSettings() {
     const data = await chrome.storage.sync.get([
       'language',
+      'hasGoogleAuth',
       'spreadsheetUrl',
       'spreadsheetId',
-      'hasGoogleAuth',
+      'availableSheets',
+      'activeSheetId',
     ]);
+
+    const availableSheets = buildAvailableSheets(data);
+    const activeSheetId = resolveActiveSheetId(availableSheets, data.activeSheetId || data.spreadsheetId);
+    const activeSheet = availableSheets.find((sheet) => sheet.id === activeSheetId) || null;
 
     return {
       language: self.JDSaverI18n
         ? self.JDSaverI18n.normalizeLanguage(data.language)
         : 'en',
-      spreadsheetUrl: trimText(data.spreadsheetUrl),
-      spreadsheetId: trimText(data.spreadsheetId),
       hasGoogleAuth: Boolean(data.hasGoogleAuth),
+      availableSheets,
+      activeSheetId,
+      activeSheet,
+      spreadsheetUrl: activeSheet?.url || '',
+      spreadsheetId: activeSheet?.id || '',
     };
   }
 

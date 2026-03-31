@@ -1,11 +1,20 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const languageButtons = Array.from(document.querySelectorAll('.language-button'));
+  const sheetSelectorField = document.getElementById('sheet-selector-field');
+  const sheetSelectorShell = document.getElementById('sheet-selector-shell');
+  const sheetSelector = document.getElementById('sheet-selector');
+  const sheetSelectorTrigger = document.getElementById('sheet-selector-trigger');
+  const sheetSelectorLabel = document.getElementById('sheet-selector-label');
+  const sheetSelectorMenu = document.getElementById('sheet-selector-menu');
   const spreadsheetUrlInput = document.getElementById('spreadsheet-url');
   const copySheetUrlButton = document.getElementById('copy-sheet-url');
-  const spreadsheetIdInput = document.getElementById('spreadsheet-id');
   const spreadsheetMeta = document.getElementById('spreadsheet-meta');
+  const activeSheetCard = document.getElementById('active-sheet-card');
+  const activeSheetName = document.getElementById('active-sheet-name');
+  const activeSheetIdText = document.getElementById('active-sheet-id-text');
   const createSheetButton = document.getElementById('create-sheet');
   const openSheetButton = document.getElementById('open-sheet');
+  const refreshSheetsButton = document.getElementById('refresh-sheets');
   const authStatusIcon = document.getElementById('auth-status-icon');
   const authStatus = document.getElementById('auth-status');
   const statusText = document.getElementById('settings-status');
@@ -13,6 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const disconnectGoogleButton = document.getElementById('disconnect-google');
 
   let currentLanguage = self.JDSaverI18n.DEFAULT_LANGUAGE;
+  let settings = null;
 
   function t(key, variables) {
     return self.JDSaverI18n.translate(currentLanguage, key, variables);
@@ -36,37 +46,127 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateLanguageButtons(currentLanguage);
   }
 
+  function closeSheetSelectorMenu() {
+    sheetSelectorMenu.hidden = true;
+    sheetSelectorTrigger.setAttribute('aria-expanded', 'false');
+    sheetSelectorShell.classList.remove('is-open');
+  }
+
+  function openSheetSelectorMenu() {
+    if (sheetSelector.disabled) {
+      return;
+    }
+    sheetSelectorMenu.hidden = false;
+    sheetSelectorTrigger.setAttribute('aria-expanded', 'true');
+    sheetSelectorShell.classList.add('is-open');
+  }
+
+  function setCustomSheetSelectorLabel(currentSettings) {
+    const activeSheet = currentSettings.activeSheet;
+    sheetSelectorLabel.textContent = activeSheet
+      ? activeSheet.name
+      : t('settings.noSheetSaved');
+  }
+
+  function populateSheetSelector(currentSettings) {
+    const { availableSheets = [], activeSheetId = '' } = currentSettings;
+    sheetSelector.innerHTML = '';
+    sheetSelectorMenu.innerHTML = '';
+
+    availableSheets.forEach((sheet) => {
+      const option = document.createElement('option');
+      option.value = sheet.id;
+      option.textContent = sheet.name;
+      option.selected = sheet.id === activeSheetId;
+      sheetSelector.appendChild(option);
+
+      const menuButton = document.createElement('button');
+      menuButton.type = 'button';
+      menuButton.className = 'custom-select-option';
+      if (sheet.id === activeSheetId) {
+        menuButton.classList.add('is-active');
+        menuButton.setAttribute('aria-selected', 'true');
+      } else {
+        menuButton.setAttribute('aria-selected', 'false');
+      }
+      menuButton.setAttribute('role', 'option');
+      menuButton.dataset.sheetId = sheet.id;
+      menuButton.textContent = sheet.name;
+      menuButton.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        if (sheet.id === settings.activeSheetId) {
+          closeSheetSelectorMenu();
+          return;
+        }
+
+        await self.JDSaverUtils.saveSettings({
+          activeSheetId: sheet.id,
+        });
+
+        closeSheetSelectorMenu();
+        await refreshSettings('settings.activeSheetChanged', 'success');
+      });
+      sheetSelectorMenu.appendChild(menuButton);
+    });
+
+    sheetSelectorField.hidden = availableSheets.length <= 1;
+    sheetSelector.disabled = availableSheets.length <= 1;
+    sheetSelectorTrigger.disabled = availableSheets.length <= 1;
+    setCustomSheetSelectorLabel(currentSettings);
+    closeSheetSelectorMenu();
+  }
+
   function setSheetState(hasSheet) {
     copySheetUrlButton.hidden = !hasSheet;
     openSheetButton.hidden = !hasSheet;
+    refreshSheetsButton.hidden = !hasSheet;
+    activeSheetCard.hidden = !hasSheet;
   }
 
-  function renderSettings(settings) {
-    spreadsheetUrlInput.value = settings.spreadsheetUrl;
-    copySheetUrlButton.disabled = !settings.spreadsheetUrl;
+  function renderSettings(currentSettings) {
+    const activeSheet = currentSettings.activeSheet;
+    const hasSheet = Boolean(activeSheet);
+
+    populateSheetSelector(currentSettings);
+
+    spreadsheetUrlInput.value = currentSettings.spreadsheetUrl;
+    copySheetUrlButton.disabled = !currentSettings.spreadsheetUrl;
     copySheetUrlButton.setAttribute('aria-label', t('settings.copySheetUrl'));
-    spreadsheetIdInput.textContent = settings.spreadsheetId || '-';
-    spreadsheetMeta.textContent = settings.spreadsheetId
-      ? t('settings.sheetLocked', { spreadsheetId: settings.spreadsheetId })
+    activeSheetName.textContent = activeSheet?.name || t('common.hyphen');
+    activeSheetIdText.textContent = hasSheet
+      ? t('settings.activeSheetIdText', { spreadsheetId: currentSettings.spreadsheetId })
       : t('settings.noSheetSaved');
-    authStatus.textContent = settings.hasGoogleAuth
+    spreadsheetMeta.textContent = hasSheet
+      ? t('settings.sheetSummary', {
+        count: currentSettings.availableSheets.length,
+      })
+      : t('settings.noSheetSaved');
+    authStatus.textContent = currentSettings.hasGoogleAuth
       ? t('settings.authConnected')
       : t('settings.authDisconnected');
-    authStatusIcon.hidden = !settings.hasGoogleAuth;
-    authStatus.className = settings.hasGoogleAuth ? 'status-text success' : 'status-text';
-    connectGoogleButton.textContent = settings.hasGoogleAuth
+    authStatusIcon.hidden = !currentSettings.hasGoogleAuth;
+    authStatus.className = currentSettings.hasGoogleAuth ? 'status-text success' : 'status-text';
+    connectGoogleButton.textContent = currentSettings.hasGoogleAuth
       ? t('settings.refreshGoogle')
       : t('settings.connectGoogle');
-    disconnectGoogleButton.hidden = !settings.hasGoogleAuth;
-    createSheetButton.textContent = settings.spreadsheetId
+    disconnectGoogleButton.hidden = !currentSettings.hasGoogleAuth;
+    createSheetButton.textContent = hasSheet
       ? t('settings.createNewSheetButton')
       : t('settings.openTemplateButton');
-    setSheetState(Boolean(settings.spreadsheetId));
+    setSheetState(hasSheet);
   }
 
-  const settings = await self.JDSaverUtils.getSettings();
-  applyLanguage(settings.language);
-  renderSettings(settings);
+  async function refreshSettings(statusKey, tone, variables) {
+    settings = await self.JDSaverUtils.getSettings();
+    applyLanguage(settings.language);
+    renderSettings(settings);
+
+    if (statusKey) {
+      setStatus(statusKey, tone, variables);
+    }
+  }
+
+  await refreshSettings();
 
   if (settings.spreadsheetId) {
     setStatus('settings.loaded', 'success');
@@ -80,10 +180,29 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       await self.JDSaverUtils.saveSettings({ language });
-      applyLanguage(language);
-      renderSettings(await self.JDSaverUtils.getSettings());
-      setStatus('settings.languageSaved', 'success');
+      await refreshSettings('settings.languageSaved', 'success');
     });
+  });
+
+  sheetSelectorTrigger.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (sheetSelectorMenu.hidden) {
+      openSheetSelectorMenu();
+    } else {
+      closeSheetSelectorMenu();
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!sheetSelectorShell.contains(event.target)) {
+      closeSheetSelectorMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeSheetSelectorMenu();
+    }
   });
 
   copySheetUrlButton.addEventListener('click', async () => {
@@ -111,6 +230,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     await chrome.tabs.create({ url: value });
   });
 
+  refreshSheetsButton.addEventListener('click', async () => {
+    if (!settings?.availableSheets?.length) {
+      return;
+    }
+
+    if (!settings.hasGoogleAuth) {
+      setStatus('settings.createSheetRequiresAuth', 'error');
+      return;
+    }
+
+    refreshSheetsButton.disabled = true;
+    setStatus('settings.refreshingSheets', '');
+
+    try {
+      const token = await self.JDSaverUtils.getGoogleAuthToken(true);
+      const refreshedSheets = await Promise.all(
+        settings.availableSheets.map(async (sheet) => {
+          try {
+            const metadata = await self.JDSaverUtils.getSpreadsheetMetadata(sheet.id, token);
+            const spreadsheetName = self.JDSaverUtils.trimText(metadata.properties?.title) || sheet.name;
+            return {
+              ...sheet,
+              name: spreadsheetName,
+            };
+          } catch (error) {
+            return sheet;
+          }
+        })
+      );
+
+      await self.JDSaverUtils.saveSettings({
+        availableSheets: refreshedSheets,
+      });
+
+      await refreshSettings('settings.refreshSheetsSuccess', 'success');
+    } catch (error) {
+      statusText.textContent = error.message || t('settings.refreshSheetsFailed');
+      statusText.className = 'status-text error';
+    } finally {
+      refreshSheetsButton.disabled = false;
+    }
+  });
+
   connectGoogleButton.addEventListener('click', async () => {
     if (!self.JDSaverUtils.isOauthConfigured()) {
       setStatus('settings.oauthMissing', 'error');
@@ -126,8 +288,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         hasGoogleAuth: true,
       });
 
-      renderSettings(await self.JDSaverUtils.getSettings());
-      setStatus('settings.googleConnectedSuccess', 'success');
+      await refreshSettings('settings.googleConnectedSuccess', 'success');
     } catch (error) {
       statusText.textContent = error.message || t('settings.googleConnectFailed');
       statusText.className = 'status-text error';
@@ -144,8 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       await self.JDSaverUtils.saveSettings({
         hasGoogleAuth: false,
       });
-      renderSettings(await self.JDSaverUtils.getSettings());
-      setStatus('settings.googleDisconnectedSuccess', 'success');
+      await refreshSettings('settings.googleDisconnectedSuccess', 'success');
     } catch (error) {
       statusText.textContent = error.message || t('settings.googleDisconnectFailed');
       statusText.className = 'status-text error';
@@ -177,6 +337,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const spreadsheetId = self.JDSaverUtils.trimText(createdSheet.spreadsheetId);
       const spreadsheetUrl = self.JDSaverUtils.trimText(createdSheet.spreadsheetUrl)
         || self.JDSaverUtils.getSheetUrlFromId(spreadsheetId);
+      const spreadsheetName = self.JDSaverUtils.trimText(createdSheet.properties?.title)
+        || self.JDSaverUtils.buildSpreadsheetName();
       const firstSheetId = createdSheet.sheets?.[0]?.properties?.sheetId;
 
       if (typeof firstSheetId !== 'number') {
@@ -185,19 +347,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       await self.JDSaverUtils.setupSpreadsheetTemplate(spreadsheetId, firstSheetId, token);
 
+      const nextSheets = [
+        {
+          id: spreadsheetId,
+          url: spreadsheetUrl,
+          name: spreadsheetName,
+        },
+        ...settings.availableSheets.filter((sheet) => sheet.id !== spreadsheetId),
+      ];
+
       await self.JDSaverUtils.saveSettings({
-        spreadsheetUrl,
-        spreadsheetId,
+        availableSheets: nextSheets,
+        activeSheetId: spreadsheetId,
         language: currentLanguage,
       });
 
-      const latestSettings = await self.JDSaverUtils.getSettings();
-      Object.assign(settings, latestSettings, {
-        spreadsheetUrl,
-        spreadsheetId,
+      await refreshSettings('settings.createSheetSuccess', 'success', {
+        spreadsheetName,
       });
-      renderSettings(settings);
-      setStatus('settings.createSheetSuccess', 'success');
     } catch (error) {
       statusText.textContent = error.message || t('settings.createSheetFailed');
       statusText.className = 'status-text error';

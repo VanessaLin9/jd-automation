@@ -76,6 +76,8 @@
                     <p class="helper-text" data-i18n="settings.openTemplateHelp">Connect Google first, then let JD Saver create a ready-to-use job tracker for you.</p>
                   </div>
                 </div>
+              </div>
+              <div class="template-actions">
                 <button id="create-sheet" class="primary-button" type="button" data-i18n="settings.openTemplateButton">
                   Create My Sheet
                 </button>
@@ -87,10 +89,41 @@
             <div class="section-header">
               <div class="section-header-copy">
                 <p class="eyebrow" data-i18n="settings.step3">Step 3</p>
-                <h2 data-i18n="settings.sheetUrlTitle">Your Google Sheet</h2>
+                <h2 data-i18n="settings.sheetUrlTitle">Your Google Sheets</h2>
                 <p id="spreadsheet-meta" class="helper-text" data-i18n="settings.noSheetSaved">No Google Sheet has been created yet.</p>
               </div>
+              <button id="refresh-sheets" class="ghost-button" type="button" hidden data-i18n="settings.refreshSheetsButton">
+                Refresh Names
+              </button>
             </div>
+
+            <label id="sheet-selector-field" class="field" hidden>
+              <span data-i18n="settings.sheetSelectorLabel">Current active sheet</span>
+              <div class="custom-select" id="sheet-selector-shell">
+                <button
+                  id="sheet-selector-trigger"
+                  class="custom-select-trigger"
+                  type="button"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                >
+                  <span id="sheet-selector-label">-</span>
+                  <span class="select-chevron" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" class="select-chevron-icon" role="presentation">
+                      <path d="M5 7.5 10 12.5 15 7.5"></path>
+                    </svg>
+                  </span>
+                </button>
+                <div id="sheet-selector-menu" class="custom-select-menu" role="listbox" hidden></div>
+                <select id="sheet-selector" name="activeSheetId" class="visually-hidden" tabindex="-1" aria-hidden="true"></select>
+              </div>
+            </label>
+
+            <section id="active-sheet-card" class="active-sheet-card" hidden>
+              <p class="active-sheet-label" data-i18n="settings.activeSheetCardLabel">Active sheet</p>
+              <p id="active-sheet-name" class="active-sheet-name">-</p>
+              <p id="active-sheet-id-text" class="active-sheet-id">Spreadsheet ID: -</p>
+            </section>
 
             <label class="field">
               <span data-i18n="settings.sheetUrlLabel">Google Sheet URL</span>
@@ -118,11 +151,6 @@
                 </button>
               </div>
             </label>
-
-            <div class="inline-meta">
-              <span class="inline-meta-label" data-i18n="settings.savedSpreadsheetId">Active Spreadsheet ID</span>
-              <code id="spreadsheet-id" class="inline-meta-value">-</code>
-            </div>
 
             <div class="form-actions">
               <button id="open-sheet" class="ghost-button" type="button" hidden data-i18n="settings.openSheetButton">Open My Sheet</button>

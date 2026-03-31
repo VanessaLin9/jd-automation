@@ -31,15 +31,6 @@
       .trim();
   }
 
-  function firstNonEmptyMultiline(...values) {
-    for (const value of values) {
-      const text = cleanMultilineText(value);
-      if (text) {
-        return text;
-      }
-    }
-    return '';
-  }
 
   function toSingleLineText(value) {
     return cleanMultilineText(value).replace(/\n+/g, ' | ');

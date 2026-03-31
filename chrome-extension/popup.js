@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function isSaveReady(settingsValue) {
-    return Boolean(settingsValue && settingsValue.spreadsheetId && settingsValue.hasGoogleAuth);
+    return Boolean(settingsValue && settingsValue.activeSheet && settingsValue.hasGoogleAuth);
   }
 
   function validateExtractedData(data) {
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function saveJobData() {
-    if (!settings || !settings.spreadsheetId) {
+    if (!settings || !settings.activeSheet) {
       throw new Error(t('popup.settingsMissing'));
     }
 
@@ -189,16 +189,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       throw new Error(t('popup.noToken'));
     }
 
-    await verifyWorksheetExists(settings.spreadsheetId, token);
+    await verifyWorksheetExists(settings.activeSheet.id, token);
 
-    const duplicate = await isDuplicateJobUrl(settings.spreadsheetId, payload.job_url, token);
+    const duplicate = await isDuplicateJobUrl(settings.activeSheet.id, payload.job_url, token);
     if (duplicate) {
       return { status: 'duplicate' };
     }
 
-    const nextRow = await getNextWritableRow(settings.spreadsheetId, token);
+    const nextRow = await getNextWritableRow(settings.activeSheet.id, token);
     const rowValues = self.JDSaverUtils.buildSheetRowFromPayload(payload);
-    await self.JDSaverUtils.updateSheetRow(settings.spreadsheetId, nextRow, rowValues, token);
+    await self.JDSaverUtils.updateSheetRow(settings.activeSheet.id, nextRow, rowValues, token);
 
     return { status: 'created' };
   }
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     settings = await self.JDSaverUtils.getSettings();
     applyLanguage(settings.language);
 
-    if (!settings.spreadsheetId) {
+    if (!settings.activeSheet) {
       setStatus('popup.settingsMissingOpen', 'error');
       return;
     }
