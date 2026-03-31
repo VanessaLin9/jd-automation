@@ -116,8 +116,8 @@
   }
 
   function buildSpreadsheetName() {
-    const date = new Date().toISOString().slice(0, 10);
-    return `JD Saver - ${date}`;
+    const year = new Date().getFullYear();
+    return `JD Saver - ${year}`;
   }
 
   async function getGoogleAuthToken(interactive = false) {
@@ -249,16 +249,18 @@
       {
         repeatCell: {
           range: {
-            sheetId,
             startRowIndex: 0,
             endRowIndex: 1,
+            startColumnIndex: 0,
+            endColumnIndex: 10,
+            sheetId,
           },
           cell: {
             userEnteredFormat: {
               backgroundColor: {
-                red: 0.88,
-                green: 0.91,
-                blue: 0.96,
+                red: 0.86,
+                green: 0.92,
+                blue: 0.98,
               },
               textFormat: {
                 bold: true,
@@ -276,15 +278,65 @@
         },
       },
       {
-        setBasicFilter: {
-          filter: {
-            range: {
-              sheetId,
-              startRowIndex: 0,
-              startColumnIndex: 0,
-              endColumnIndex: TEMPLATE_COLUMNS.length,
+        repeatCell: {
+          range: {
+            startRowIndex: 0,
+            endRowIndex: 1,
+            startColumnIndex: 10,
+            endColumnIndex: 13,
+            sheetId,
+          },
+          cell: {
+            userEnteredFormat: {
+              backgroundColor: {
+                red: 0.92,
+                green: 0.92,
+                blue: 0.92,
+              },
+              textFormat: {
+                bold: true,
+                foregroundColor: {
+                  red: 0.18,
+                  green: 0.14,
+                  blue: 0.11,
+                },
+              },
+              verticalAlignment: 'MIDDLE',
+              wrapStrategy: 'WRAP',
             },
           },
+          fields: 'userEnteredFormat(backgroundColor,textFormat,verticalAlignment,wrapStrategy)',
+        },
+      },
+      {
+        repeatCell: {
+          range: {
+            startRowIndex: 0,
+            endRowIndex: 1,
+            startColumnIndex: 13,
+            endColumnIndex: 14,
+            sheetId,
+          },
+          cell: {
+            userEnteredFormat: {
+              backgroundColor: {
+                red: 0.95,
+                green: 0.67,
+                blue: 0.67,
+              },
+              textFormat: {
+                bold: true,
+                foregroundColor: {
+                  red: 0.18,
+                  green: 0.14,
+                  blue: 0.11,
+                },
+              },
+              verticalAlignment: 'MIDDLE',
+              wrapStrategy: 'WRAP',
+            },
+          },
+          fields: 'userEnteredFormat(backgroundColor,textFormat,verticalAlignment,wrapStrategy)',
         },
       },
       {
@@ -384,6 +436,292 @@
             },
             strict: true,
             showCustomUi: true,
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 2,
+              endColumnIndex: 3,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'saved' }],
+              },
+              format: {
+                backgroundColor: { red: 0.84, green: 0.94, blue: 0.82 },
+                textFormat: {
+                  foregroundColor: { red: 0.10, green: 0.49, blue: 0.24 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 2,
+              endColumnIndex: 3,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'archived' }],
+              },
+              format: {
+                backgroundColor: { red: 0.92, green: 0.92, blue: 0.92 },
+                textFormat: {
+                  foregroundColor: { red: 0.31, green: 0.35, blue: 0.40 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 2,
+              endColumnIndex: 3,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'skipped' }],
+              },
+              format: {
+                backgroundColor: { red: 0.99, green: 0.91, blue: 0.66 },
+                textFormat: {
+                  foregroundColor: { red: 0.56, green: 0.38, blue: 0.04 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 11,
+              endColumnIndex: 12,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'not applied' }],
+              },
+              format: {
+                backgroundColor: { red: 0.92, green: 0.92, blue: 0.92 },
+                textFormat: {
+                  foregroundColor: { red: 0.31, green: 0.35, blue: 0.40 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 11,
+              endColumnIndex: 12,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'applied' }],
+              },
+              format: {
+                backgroundColor: { red: 0.84, green: 0.94, blue: 0.82 },
+                textFormat: {
+                  foregroundColor: { red: 0.10, green: 0.49, blue: 0.24 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 11,
+              endColumnIndex: 12,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'interviewing' }],
+              },
+              format: {
+                backgroundColor: { red: 1.0, green: 0.83, blue: 0.76 },
+                textFormat: {
+                  foregroundColor: { red: 0.76, green: 0.24, blue: 0.14 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 11,
+              endColumnIndex: 12,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'offer' }],
+              },
+              format: {
+                backgroundColor: { red: 0.77, green: 0.05, blue: 0.05 },
+                textFormat: {
+                  foregroundColor: { red: 1.0, green: 1.0, blue: 1.0 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 11,
+              endColumnIndex: 12,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'rejected' }],
+              },
+              format: {
+                backgroundColor: { red: 0.16, green: 0.42, blue: 0.80 },
+                textFormat: {
+                  foregroundColor: { red: 1.0, green: 1.0, blue: 1.0 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 13,
+              endColumnIndex: 14,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'prepare_to_apply' }],
+              },
+              format: {
+                backgroundColor: { red: 1.0, green: 0.86, blue: 0.86 },
+                textFormat: {
+                  foregroundColor: { red: 0.73, green: 0.13, blue: 0.13 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 13,
+              endColumnIndex: 14,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'summarize_jd' }],
+              },
+              format: {
+                backgroundColor: { red: 0.84, green: 0.94, blue: 0.82 },
+                textFormat: {
+                  foregroundColor: { red: 0.10, green: 0.49, blue: 0.24 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 13,
+              endColumnIndex: 14,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'archive_record' }],
+              },
+              format: {
+                backgroundColor: { red: 0.25, green: 0.25, blue: 0.25 },
+                textFormat: {
+                  foregroundColor: { red: 1.0, green: 1.0, blue: 1.0 },
+                  bold: true,
+                },
+              },
+            },
           },
         },
       },

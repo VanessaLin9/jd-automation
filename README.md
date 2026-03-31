@@ -24,7 +24,7 @@ See [LICENSE](./LICENSE) and [NOTICE](./NOTICE).
 
 - Save the current job page to your own Google Sheet
 - Support Google OAuth + Google Sheets API
-- Use a public template and make your own copy
+- Create and initialize a ready-to-use Google Sheet directly from the extension
 - Detect duplicate job URLs
 - Support English and Traditional Chinese in the extension UI
 - Support site-specific extraction for:
@@ -34,20 +34,24 @@ See [LICENSE](./LICENSE) and [NOTICE](./NOTICE).
 
 ## How It Works
 
-1. Open the template link from the extension settings page
-2. Make a copy into your own Google Drive
-3. Paste your copied Google Sheet URL into the extension settings
-4. Connect your Google account
+1. Open the extension settings page
+2. Connect your Google account
+3. Click `Create My Sheet`
+4. JD Saver creates and configures your Google Sheet automatically
 5. Visit a supported JD page
 6. Click `Save JD`
 
 The extension writes the extracted job data directly into your own Google Sheet.
 
-## Template
+## Generated Sheet
 
-Public template copy link:
+JD Saver creates a Google Sheet for the user during setup.
+The generated sheet includes:
 
-[Make a copy](https://docs.google.com/spreadsheets/d/1Ai0EoNhw1o56FfZjfncs73wMnJ18pn6kFssDA238524/copy)
+- worksheet name: `JD 收錄池`
+- the required column order
+- frozen header row
+- default dropdown fields for the status columns
 
 Current worksheet name expected by the extension:
 
@@ -77,18 +81,14 @@ Current column order used by the extension:
 3. Choose `Load unpacked`
 4. Select the `chrome-extension/` directory
 5. Open the extension settings page
-6. Click `Open Template`
-7. Make a copy into your own Google Drive
-8. Paste your copied Google Sheet URL
-9. Connect your Google account
-10. Visit a job page and click `Save JD`
+6. Click `Connect Google`
+7. Click `Create My Sheet`
+8. Visit a job page and click `Save JD`
 
 ## Project Layout
 
 ```text
 chrome-extension/
-docs/
-templates/
 ```
 
 ## Notes
@@ -130,7 +130,7 @@ templates/
 
 - 將目前職缺頁面存到使用者自己的 Google Sheet
 - 使用 Google OAuth 與 Google Sheets API
-- 提供公開 template，可先複製成自己的版本
+- 直接由 extension 建立並初始化可用的 Google Sheet
 - 可檢查重複的職缺網址
 - extension UI 支援英文與繁體中文
 - 已針對以下網站做較佳擷取：
@@ -140,20 +140,24 @@ templates/
 
 ## 使用方式
 
-1. 在 extension 設定頁打開 template
-2. 複製一份到自己的 Google Drive
-3. 把你自己的 Google Sheet 網址貼到設定頁
-4. 連接 Google 帳號
+1. 打開 extension 設定頁
+2. 連接 Google 帳號
+3. 點 `Create My Sheet`
+4. JD Saver 會自動建立並初始化你的 Google Sheet
 5. 前往支援的職缺頁面
 6. 按下 `Save JD`
 
 extension 會把擷取出的資料直接寫進你的 Google Sheet。
 
-## Template
+## 建立出的表單
 
-公開 template 複製連結：
+JD Saver 會在設定流程中直接建立使用者自己的 Google Sheet。
+建立完成後會自動初始化：
 
-[建立副本](https://docs.google.com/spreadsheets/d/1Ai0EoNhw1o56FfZjfncs73wMnJ18pn6kFssDA238524/copy)
+- 工作表名稱：`JD 收錄池`
+- 必要欄位順序
+- 凍結標題列
+- 狀態欄位的預設下拉選單
 
 extension 目前預期使用的工作表名稱：
 
@@ -183,18 +187,14 @@ extension 目前使用的欄位順序：
 3. 點選 `Load unpacked`
 4. 選擇 `chrome-extension/` 資料夾
 5. 打開 extension 設定頁
-6. 點 `Open Template`
-7. 複製一份到自己的 Google Drive
-8. 貼上你自己的 Google Sheet 網址
-9. 連接 Google 帳號
-10. 前往職缺頁面並點擊 `Save JD`
+6. 點 `Connect Google`
+7. 點 `Create My Sheet`
+8. 前往職缺頁面並點擊 `Save JD`
 
 ## 專案結構
 
 ```text
 chrome-extension/
-docs/
-templates/
 ```
 
 ## 備註

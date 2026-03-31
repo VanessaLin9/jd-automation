@@ -28,22 +28,61 @@
       </header>
 
       <section class="settings-form">
-        <section class="settings-section settings-section-template">
-          <div class="section-header">
-            <div class="section-header-copy">
-              <p class="eyebrow" data-i18n="settings.step2">Step 2</p>
-              <h2 data-i18n="settings.openTemplateTitle">Create Your Google Sheet</h2>
-              <div class="template-row">
-                  <p class="helper-text" data-i18n="settings.openTemplateHelp">Connect Google first, then let JD Saver create a ready-to-use job tracker for you.</p>
-              </div>
-            </div>
-            <button id="create-sheet" class="primary-button" type="button" data-i18n="settings.openTemplateButton">
-              Create My Sheet
-            </button>
-          </div>
-        </section>
-
         <div class="settings-grid">
+          <div class="settings-column">
+            <section class="settings-section settings-section-connection">
+              <div class="section-header">
+                <div class="section-header-copy">
+                  <p class="eyebrow" data-i18n="settings.step1">Step 1</p>
+                  <h2 data-i18n="settings.googleConnectionTitle">Google Connection</h2>
+                  <p class="helper-text" data-i18n="settings.googleConnectionHelp">Connect your Google account so JD Saver can create and update your own job-tracking sheet.</p>
+                </div>
+              </div>
+
+              <div class="connection-card">
+                <div class="connection-badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" class="google-badge-icon" role="presentation">
+                    <path fill="#4285F4" d="M21.805 12.23c0-.64-.057-1.253-.163-1.84H12v3.48h5.52a4.72 4.72 0 0 1-2.05 3.1v2.57h3.31c1.94-1.79 3.025-4.43 3.025-7.31Z"/>
+                    <path fill="#34A853" d="M12 22c2.73 0 5.02-.9 6.7-2.46l-3.31-2.57c-.92.62-2.09.99-3.39.99-2.61 0-4.82-1.76-5.61-4.12H3.02v2.59A10 10 0 0 0 12 22Z"/>
+                    <path fill="#FBBC05" d="M6.39 13.84A5.99 5.99 0 0 1 6.07 12c0-.64.11-1.26.32-1.84V7.57H3.02A10 10 0 0 0 2 12c0 1.61.39 3.13 1.02 4.43l3.37-2.59Z"/>
+                    <path fill="#EA4335" d="M12 6.04c1.49 0 2.82.51 3.87 1.52l2.9-2.9C17.01 2.98 14.73 2 12 2a10 10 0 0 0-8.98 5.57l3.37 2.59C7.18 7.8 9.39 6.04 12 6.04Z"/>
+                  </svg>
+                </div>
+                <div class="connection-text">
+                  <h3 class="connection-title" data-i18n="settings.googleConnectionTitle">Google Connection</h3>
+                  <div class="auth-status-row">
+                    <span id="auth-status-icon" class="auth-status-icon" hidden aria-hidden="true">
+                      <svg viewBox="0 0 20 20" class="auth-status-icon-svg" role="presentation">
+                        <circle cx="10" cy="10" r="10"></circle>
+                        <path d="M6 10.5 8.5 13 14 7.5"></path>
+                      </svg>
+                    </span>
+                    <p id="auth-status" class="status-text" data-i18n="settings.authDisconnected">Google account is not connected yet.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="connection-actions">
+                <button id="connect-google" class="primary-button" type="button" data-i18n="settings.connectGoogle">Connect Google</button>
+                <button id="disconnect-google" class="ghost-button" type="button" hidden data-i18n="settings.disconnectGoogle">Disconnect</button>
+              </div>
+            </section>
+
+            <section class="settings-section settings-section-template">
+              <div class="section-header">
+                <div class="section-header-copy">
+                  <p class="eyebrow" data-i18n="settings.step2">Step 2</p>
+                  <h2 data-i18n="settings.openTemplateTitle">Create Your Google Sheet</h2>
+                  <div class="template-row">
+                    <p class="helper-text" data-i18n="settings.openTemplateHelp">Connect Google first, then let JD Saver create a ready-to-use job tracker for you.</p>
+                  </div>
+                </div>
+                <button id="create-sheet" class="primary-button" type="button" data-i18n="settings.openTemplateButton">
+                  Create My Sheet
+                </button>
+              </div>
+            </section>
+          </div>
+
           <section class="settings-section settings-section-sheet">
             <div class="section-header">
               <div class="section-header-copy">
@@ -87,43 +126,6 @@
 
             <div class="form-actions">
               <button id="open-sheet" class="ghost-button" type="button" hidden data-i18n="settings.openSheetButton">Open My Sheet</button>
-            </div>
-          </section>
-
-          <section class="settings-section settings-section-connection">
-            <div class="section-header">
-              <div class="section-header-copy">
-                <p class="eyebrow" data-i18n="settings.step1">Step 1</p>
-                <h2 data-i18n="settings.googleConnectionTitle">Google Connection</h2>
-                <p class="helper-text" data-i18n="settings.googleConnectionHelp">Connect your Google account so JD Saver can create and update your own job-tracking sheet.</p>
-              </div>
-            </div>
-
-            <div class="connection-card">
-              <div class="connection-badge" aria-hidden="true">
-                <svg viewBox="0 0 24 24" class="google-badge-icon" role="presentation">
-                  <path fill="#4285F4" d="M21.805 12.23c0-.64-.057-1.253-.163-1.84H12v3.48h5.52a4.72 4.72 0 0 1-2.05 3.1v2.57h3.31c1.94-1.79 3.025-4.43 3.025-7.31Z"/>
-                  <path fill="#34A853" d="M12 22c2.73 0 5.02-.9 6.7-2.46l-3.31-2.57c-.92.62-2.09.99-3.39.99-2.61 0-4.82-1.76-5.61-4.12H3.02v2.59A10 10 0 0 0 12 22Z"/>
-                  <path fill="#FBBC05" d="M6.39 13.84A5.99 5.99 0 0 1 6.07 12c0-.64.11-1.26.32-1.84V7.57H3.02A10 10 0 0 0 2 12c0 1.61.39 3.13 1.02 4.43l3.37-2.59Z"/>
-                  <path fill="#EA4335" d="M12 6.04c1.49 0 2.82.51 3.87 1.52l2.9-2.9C17.01 2.98 14.73 2 12 2a10 10 0 0 0-8.98 5.57l3.37 2.59C7.18 7.8 9.39 6.04 12 6.04Z"/>
-                </svg>
-              </div>
-              <div class="connection-text">
-                <h3 class="connection-title" data-i18n="settings.googleConnectionTitle">Google Connection</h3>
-                <div class="auth-status-row">
-                  <span id="auth-status-icon" class="auth-status-icon" hidden aria-hidden="true">
-                    <svg viewBox="0 0 20 20" class="auth-status-icon-svg" role="presentation">
-                      <circle cx="10" cy="10" r="10"></circle>
-                      <path d="M6 10.5 8.5 13 14 7.5"></path>
-                    </svg>
-                  </span>
-                  <p id="auth-status" class="status-text" data-i18n="settings.authDisconnected">Google account is not connected yet.</p>
-                </div>
-              </div>
-            </div>
-            <div class="connection-actions">
-              <button id="connect-google" class="primary-button" type="button" data-i18n="settings.connectGoogle">Connect Google</button>
-              <button id="disconnect-google" class="ghost-button" type="button" hidden data-i18n="settings.disconnectGoogle">Disconnect</button>
             </div>
           </section>
         </div>
