@@ -20,6 +20,12 @@ This project is source-available under the PolyForm Noncommercial 1.0.0 license.
 
 See [LICENSE](./LICENSE) and [NOTICE](./NOTICE).
 
+## Privacy
+
+The current privacy policy for the extension is available here:
+
+- [PRIVACY.md](./PRIVACY.md)
+
 ## Features
 
 - Save the current job page to your own Google Sheet
@@ -125,6 +131,12 @@ chrome-extension/
 - 請保留原作者與 notice 資訊
 
 請參考 [LICENSE](./LICENSE) 與 [NOTICE](./NOTICE)。
+
+## 隱私權政策
+
+目前 extension 的隱私權政策請參考：
+
+- [PRIVACY.md](./PRIVACY.md)
 
 ## 目前功能
 
