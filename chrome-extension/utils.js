@@ -52,14 +52,24 @@
       'Rows with a saved job URL where Applied Date exists, or Application Status is applied/interviewing/offer/rejected.',
     ],
     [
-      'Replied Count / 有回覆數',
+      'Application Reply Count / 投遞回覆數',
       `=SUMPRODUCT(--(LEN('${WORKSHEET_NAME}'!A2:A)>0),--(((LEN('${WORKSHEET_NAME}'!P2:P)>0)+(LEN('${WORKSHEET_NAME}'!R2:R)>0)+(LEN('${WORKSHEET_NAME}'!T2:T)>0)+(LEN('${WORKSHEET_NAME}'!U2:U)>0))>0))`,
-      'Rows with a saved job URL where any interview date or final result has been recorded.',
+      'Applied rows where any interview date or final result has been recorded.',
     ],
     [
-      'Reply Rate / 回覆率',
+      'Application Reply Rate / 投遞回覆率',
       '=IF(B2=0,0,B3/B2)',
-      'Replied Count / Applied Count',
+      'Application Reply Count / Applied Count',
+    ],
+    [
+      'Inbound Invite Count / 主動邀約數',
+      `=COUNTIFS('${WORKSHEET_NAME}'!A2:A,"<>",'${WORKSHEET_NAME}'!C2:C,"invited")`,
+      'Rows with a saved job URL where Record Status is "invited".',
+    ],
+    [
+      'Total Interest Count / 市場回應總數',
+      `=SUMPRODUCT(--(LEN('${WORKSHEET_NAME}'!A2:A)>0),--((('${WORKSHEET_NAME}'!C2:C="invited")+(LEN('${WORKSHEET_NAME}'!P2:P)>0)+(LEN('${WORKSHEET_NAME}'!R2:R)>0)+(LEN('${WORKSHEET_NAME}'!T2:T)>0)+(LEN('${WORKSHEET_NAME}'!U2:U)>0))>0))`,
+      'Unique rows that show either an inbound invite or an application-side reply signal.',
     ],
     [
       'Offer Count / Offer 數',
@@ -67,9 +77,9 @@
       'Rows with a saved job URL where Result 類型 is "Get offer".',
     ],
     [
-      'Offer Rate (Replied) / Offer 率',
-      '=IF(B3=0,0,B5/B3)',
-      'Offer Count / Replied Count',
+      'Offer Rate (Application Reply) / Offer 率',
+      '=IF(B3=0,0,B7/B3)',
+      'Offer Count / Application Reply Count',
     ],
   ];
 
@@ -1255,8 +1265,8 @@
           repeatCell: {
             range: {
               sheetId: dashboardSheetId,
-              startRowIndex: 5,
-              endRowIndex: 6,
+              startRowIndex: 7,
+              endRowIndex: 8,
               startColumnIndex: 1,
               endColumnIndex: 2,
             },
