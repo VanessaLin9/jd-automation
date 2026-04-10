@@ -79,6 +79,15 @@ Current column order used by the extension:
 12. `Application Status / 投遞狀態`
 13. `Note / 備註`
 14. `Agent Queue / Agent 佇列`
+15. `關卡 1 類型`
+16. `關卡 1 日期`
+17. `關卡 2 類型`
+18. `關卡 2 日期`
+19. `關卡 3 類型`
+20. `關卡 3 日期`
+21. `Result 類型`
+
+The extension currently writes the first 14 columns directly. The later workflow columns are created by the template so the generated sheet is ready for manual tracking and downstream workflows.
 
 ## Local Testing
 
@@ -191,6 +200,15 @@ extension 目前使用的欄位順序：
 12. `Application Status / 投遞狀態`
 13. `Note / 備註`
 14. `Agent Queue / Agent 佇列`
+15. `關卡 1 類型`
+16. `關卡 1 日期`
+17. `關卡 2 類型`
+18. `關卡 2 日期`
+19. `關卡 3 類型`
+20. `關卡 3 日期`
+21. `Result 類型`
+
+目前 extension 直接寫入的是前 14 欄；後面的流程欄位會由 template 一起建立，方便後續手動追蹤與 downstream workflow 使用。
 
 ## 本地測試方式
 

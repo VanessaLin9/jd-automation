@@ -32,8 +32,17 @@
     'Application Status / 投遞狀態',
     'Note / 備註',
     'Agent Queue / Agent 佇列',
+    '關卡 1 類型',
+    '關卡 1 日期',
+    '關卡 2 類型',
+    '關卡 2 日期',
+    '關卡 3 類型',
+    '關卡 3 日期',
+    'Result 類型',
   ];
-  const TEMPLATE_COLUMN_WIDTHS = [280, 180, 170, 240, 200, 160, 140, 320, 160, 150, 150, 190, 220, 210];
+  const TEMPLATE_COLUMN_WIDTHS = [
+    280, 180, 170, 240, 200, 160, 140, 320, 160, 150, 150, 190, 220, 210, 150, 140, 150, 140, 150, 140, 160,
+  ];
 
   function nowIso() {
     return new Date().toISOString();
@@ -246,7 +255,8 @@
   }
 
   async function updateSheetRow(spreadsheetId, rowNumber, rowValues, token) {
-    const range = `${WORKSHEET_NAME}!A${rowNumber}:${columnLetterFromIndex(HEADER_ORDER.length)}${rowNumber}`;
+    const columnCount = Array.isArray(rowValues) && rowValues.length ? rowValues.length : HEADER_ORDER.length;
+    const range = `${WORKSHEET_NAME}!A${rowNumber}:${columnLetterFromIndex(columnCount)}${rowNumber}`;
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
     const response = await authorizedFetch(url, token, {
       method: 'PUT',
@@ -416,6 +426,68 @@
       {
         repeatCell: {
           range: {
+            startRowIndex: 0,
+            endRowIndex: 1,
+            startColumnIndex: 14,
+            endColumnIndex: 20,
+            sheetId,
+          },
+          cell: {
+            userEnteredFormat: {
+              backgroundColor: {
+                red: 0.99,
+                green: 0.92,
+                blue: 0.82,
+              },
+              textFormat: {
+                bold: true,
+                foregroundColor: {
+                  red: 0.18,
+                  green: 0.14,
+                  blue: 0.11,
+                },
+              },
+              verticalAlignment: 'MIDDLE',
+              wrapStrategy: 'WRAP',
+            },
+          },
+          fields: 'userEnteredFormat(backgroundColor,textFormat,verticalAlignment,wrapStrategy)',
+        },
+      },
+      {
+        repeatCell: {
+          range: {
+            startRowIndex: 0,
+            endRowIndex: 1,
+            startColumnIndex: 20,
+            endColumnIndex: 21,
+            sheetId,
+          },
+          cell: {
+            userEnteredFormat: {
+              backgroundColor: {
+                red: 0.85,
+                green: 0.94,
+                blue: 0.85,
+              },
+              textFormat: {
+                bold: true,
+                foregroundColor: {
+                  red: 0.18,
+                  green: 0.14,
+                  blue: 0.11,
+                },
+              },
+              verticalAlignment: 'MIDDLE',
+              wrapStrategy: 'WRAP',
+            },
+          },
+          fields: 'userEnteredFormat(backgroundColor,textFormat,verticalAlignment,wrapStrategy)',
+        },
+      },
+      {
+        repeatCell: {
+          range: {
             sheetId,
             startColumnIndex: 7,
             endColumnIndex: 8,
@@ -427,6 +499,82 @@
             },
           },
           fields: 'userEnteredFormat.wrapStrategy',
+        },
+      },
+      {
+        repeatCell: {
+          range: {
+            sheetId,
+            startColumnIndex: 10,
+            endColumnIndex: 11,
+            startRowIndex: 1,
+          },
+          cell: {
+            userEnteredFormat: {
+              numberFormat: {
+                type: 'DATE',
+                pattern: 'yyyy-mm-dd',
+              },
+            },
+          },
+          fields: 'userEnteredFormat.numberFormat',
+        },
+      },
+      {
+        repeatCell: {
+          range: {
+            sheetId,
+            startColumnIndex: 15,
+            endColumnIndex: 16,
+            startRowIndex: 1,
+          },
+          cell: {
+            userEnteredFormat: {
+              numberFormat: {
+                type: 'DATE',
+                pattern: 'yyyy-mm-dd',
+              },
+            },
+          },
+          fields: 'userEnteredFormat.numberFormat',
+        },
+      },
+      {
+        repeatCell: {
+          range: {
+            sheetId,
+            startColumnIndex: 17,
+            endColumnIndex: 18,
+            startRowIndex: 1,
+          },
+          cell: {
+            userEnteredFormat: {
+              numberFormat: {
+                type: 'DATE',
+                pattern: 'yyyy-mm-dd',
+              },
+            },
+          },
+          fields: 'userEnteredFormat.numberFormat',
+        },
+      },
+      {
+        repeatCell: {
+          range: {
+            sheetId,
+            startColumnIndex: 19,
+            endColumnIndex: 20,
+            startRowIndex: 1,
+          },
+          cell: {
+            userEnteredFormat: {
+              numberFormat: {
+                type: 'DATE',
+                pattern: 'yyyy-mm-dd',
+              },
+            },
+          },
+          fields: 'userEnteredFormat.numberFormat',
         },
       },
       {
@@ -460,6 +608,7 @@
                 { userEnteredValue: 'saved' },
                 { userEnteredValue: 'archived' },
                 { userEnteredValue: 'skipped' },
+                { userEnteredValue: 'invited' },
               ],
             },
             strict: true,
@@ -514,6 +663,29 @@
         },
       },
       {
+        setDataValidation: {
+          range: {
+            sheetId,
+            startColumnIndex: 20,
+            endColumnIndex: 21,
+            startRowIndex: 1,
+          },
+          rule: {
+            condition: {
+              type: 'ONE_OF_LIST',
+              values: [
+                { userEnteredValue: 'Get offer' },
+                { userEnteredValue: 'Reject' },
+                { userEnteredValue: '無聲卡' },
+                { userEnteredValue: '主動放棄' },
+              ],
+            },
+            strict: true,
+            showCustomUi: true,
+          },
+        },
+      },
+      {
         addConditionalFormatRule: {
           index: 0,
           rule: {
@@ -532,6 +704,32 @@
                 backgroundColor: { red: 0.84, green: 0.94, blue: 0.82 },
                 textFormat: {
                   foregroundColor: { red: 0.10, green: 0.49, blue: 0.24 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 2,
+              endColumnIndex: 3,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'invited' }],
+              },
+              format: {
+                backgroundColor: { red: 0.98, green: 0.86, blue: 0.86 },
+                textFormat: {
+                  foregroundColor: { red: 0.76, green: 0.24, blue: 0.14 },
                   bold: true,
                 },
               },
@@ -792,6 +990,110 @@
                 backgroundColor: { red: 0.25, green: 0.25, blue: 0.25 },
                 textFormat: {
                   foregroundColor: { red: 1.0, green: 1.0, blue: 1.0 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 20,
+              endColumnIndex: 21,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'Get offer' }],
+              },
+              format: {
+                backgroundColor: { red: 0.84, green: 0.94, blue: 0.82 },
+                textFormat: {
+                  foregroundColor: { red: 0.10, green: 0.49, blue: 0.24 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 20,
+              endColumnIndex: 21,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: 'Reject' }],
+              },
+              format: {
+                backgroundColor: { red: 0.98, green: 0.86, blue: 0.86 },
+                textFormat: {
+                  foregroundColor: { red: 0.80, green: 0.16, blue: 0.16 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 20,
+              endColumnIndex: 21,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: '無聲卡' }],
+              },
+              format: {
+                backgroundColor: { red: 0.92, green: 0.92, blue: 0.92 },
+                textFormat: {
+                  foregroundColor: { red: 0.31, green: 0.35, blue: 0.40 },
+                  bold: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [{
+              sheetId,
+              startRowIndex: 1,
+              startColumnIndex: 20,
+              endColumnIndex: 21,
+            }],
+            booleanRule: {
+              condition: {
+                type: 'TEXT_EQ',
+                values: [{ userEnteredValue: '主動放棄' }],
+              },
+              format: {
+                backgroundColor: { red: 1.0, green: 0.89, blue: 0.78 },
+                textFormat: {
+                  foregroundColor: { red: 0.67, green: 0.34, blue: 0.12 },
                   bold: true,
                 },
               },
