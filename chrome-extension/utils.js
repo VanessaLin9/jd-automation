@@ -77,6 +77,16 @@
       'Rows with a saved job URL where Result 類型 is "Get offer".',
     ],
     [
+      'Reject Count / 被拒數',
+      `=COUNTIFS('${WORKSHEET_NAME}'!A2:A,"<>",'${WORKSHEET_NAME}'!U2:U,"Reject")`,
+      'Rows with a saved job URL where Result 類型 is "Reject".',
+    ],
+    [
+      'Withdraw Count / 主動放棄數',
+      `=COUNTIFS('${WORKSHEET_NAME}'!A2:A,"<>",'${WORKSHEET_NAME}'!U2:U,"主動放棄")`,
+      'Rows with a saved job URL where Result 類型 is "主動放棄".',
+    ],
+    [
       'Offer Rate (Application Reply) / Offer 率',
       '=IF(B3=0,0,B7/B3)',
       'Offer Count / Application Reply Count',
@@ -1265,8 +1275,8 @@
           repeatCell: {
             range: {
               sheetId: dashboardSheetId,
-              startRowIndex: 7,
-              endRowIndex: 8,
+              startRowIndex: 9,
+              endRowIndex: 10,
               startColumnIndex: 1,
               endColumnIndex: 2,
             },
