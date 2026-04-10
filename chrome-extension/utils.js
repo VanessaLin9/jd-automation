@@ -1,5 +1,6 @@
 (function () {
   const WORKSHEET_NAME = 'JD 收錄池';
+  const DASHBOARD_WORKSHEET_NAME = 'Metrics / 指標總覽';
   const HEADER_ORDER = [
     'job_url',
     'saved_at',
@@ -42,6 +43,34 @@
   ];
   const TEMPLATE_COLUMN_WIDTHS = [
     280, 180, 170, 240, 200, 160, 140, 320, 160, 150, 150, 190, 220, 210, 150, 140, 150, 140, 150, 140, 160,
+  ];
+  const DASHBOARD_ROWS = [
+    ['Metric / 指標', 'Value / 數值', 'Definition / 定義'],
+    [
+      'Applied Count / 投遞數',
+      `=SUMPRODUCT(--(LEN('${WORKSHEET_NAME}'!A2:A)>0),--(((LEN('${WORKSHEET_NAME}'!K2:K)>0)+('${WORKSHEET_NAME}'!L2:L="applied")+('${WORKSHEET_NAME}'!L2:L="interviewing")+('${WORKSHEET_NAME}'!L2:L="offer")+('${WORKSHEET_NAME}'!L2:L="rejected"))>0))`,
+      'Rows with a saved job URL where Applied Date exists, or Application Status is applied/interviewing/offer/rejected.',
+    ],
+    [
+      'Replied Count / 有回覆數',
+      `=SUMPRODUCT(--(LEN('${WORKSHEET_NAME}'!A2:A)>0),--(((LEN('${WORKSHEET_NAME}'!P2:P)>0)+(LEN('${WORKSHEET_NAME}'!R2:R)>0)+(LEN('${WORKSHEET_NAME}'!T2:T)>0)+(LEN('${WORKSHEET_NAME}'!U2:U)>0))>0))`,
+      'Rows with a saved job URL where any interview date or final result has been recorded.',
+    ],
+    [
+      'Reply Rate / 回覆率',
+      '=IF(B2=0,0,B3/B2)',
+      'Replied Count / Applied Count',
+    ],
+    [
+      'Offer Count / Offer 數',
+      `=COUNTIFS('${WORKSHEET_NAME}'!A2:A,"<>",'${WORKSHEET_NAME}'!U2:U,"Get offer")`,
+      'Rows with a saved job URL where Result 類型 is "Get offer".',
+    ],
+    [
+      'Offer Rate (Replied) / Offer 率',
+      '=IF(B3=0,0,B5/B3)',
+      'Offer Count / Replied Count',
+    ],
   ];
 
   function nowIso() {
@@ -254,9 +283,7 @@
     return Array.isArray(data.values) ? data.values : [];
   }
 
-  async function updateSheetRow(spreadsheetId, rowNumber, rowValues, token) {
-    const columnCount = Array.isArray(rowValues) && rowValues.length ? rowValues.length : HEADER_ORDER.length;
-    const range = `${WORKSHEET_NAME}!A${rowNumber}:${columnLetterFromIndex(columnCount)}${rowNumber}`;
+  async function updateSheetValues(spreadsheetId, range, values, token) {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
     const response = await authorizedFetch(url, token, {
       method: 'PUT',
@@ -264,7 +291,7 @@
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        values: [rowValues],
+        values,
       }),
     });
     const data = await response.json();
@@ -274,6 +301,12 @@
     }
 
     return data;
+  }
+
+  async function updateSheetRow(spreadsheetId, rowNumber, rowValues, token) {
+    const columnCount = Array.isArray(rowValues) && rowValues.length ? rowValues.length : HEADER_ORDER.length;
+    const range = `${WORKSHEET_NAME}!A${rowNumber}:${columnLetterFromIndex(columnCount)}${rowNumber}`;
+    return updateSheetValues(spreadsheetId, range, [rowValues], token);
   }
 
   async function createSpreadsheet(token, name = buildSpreadsheetName()) {
@@ -328,6 +361,19 @@
 
   async function setupSpreadsheetTemplate(spreadsheetId, sheetId, token) {
     await updateSheetRow(spreadsheetId, 1, TEMPLATE_COLUMNS, token);
+    const dashboardResponse = await batchUpdateSpreadsheet(spreadsheetId, [
+      {
+        addSheet: {
+          properties: {
+            title: DASHBOARD_WORKSHEET_NAME,
+            gridProperties: {
+              frozenRowCount: 1,
+            },
+          },
+        },
+      },
+    ], token);
+    const dashboardSheetId = dashboardResponse.replies?.[0]?.addSheet?.properties?.sheetId;
 
     const requests = [
       {
@@ -1117,7 +1163,169 @@
       })),
     ];
 
+    if (typeof dashboardSheetId === 'number') {
+      requests.push(
+        {
+          repeatCell: {
+            range: {
+              sheetId: dashboardSheetId,
+              startRowIndex: 0,
+              endRowIndex: 1,
+              startColumnIndex: 0,
+              endColumnIndex: 3,
+            },
+            cell: {
+              userEnteredFormat: {
+                backgroundColor: {
+                  red: 0.86,
+                  green: 0.92,
+                  blue: 0.98,
+                },
+                textFormat: {
+                  bold: true,
+                  foregroundColor: {
+                    red: 0.18,
+                    green: 0.14,
+                    blue: 0.11,
+                  },
+                },
+                verticalAlignment: 'MIDDLE',
+                wrapStrategy: 'WRAP',
+              },
+            },
+            fields: 'userEnteredFormat(backgroundColor,textFormat,verticalAlignment,wrapStrategy)',
+          },
+        },
+        {
+          repeatCell: {
+            range: {
+              sheetId: dashboardSheetId,
+              startRowIndex: 1,
+              endRowIndex: DASHBOARD_ROWS.length,
+              startColumnIndex: 0,
+              endColumnIndex: 3,
+            },
+            cell: {
+              userEnteredFormat: {
+                verticalAlignment: 'MIDDLE',
+                wrapStrategy: 'WRAP',
+              },
+            },
+            fields: 'userEnteredFormat(verticalAlignment,wrapStrategy)',
+          },
+        },
+        {
+          repeatCell: {
+            range: {
+              sheetId: dashboardSheetId,
+              startRowIndex: 1,
+              endRowIndex: DASHBOARD_ROWS.length,
+              startColumnIndex: 1,
+              endColumnIndex: 2,
+            },
+            cell: {
+              userEnteredFormat: {
+                horizontalAlignment: 'RIGHT',
+              },
+            },
+            fields: 'userEnteredFormat.horizontalAlignment',
+          },
+        },
+        {
+          repeatCell: {
+            range: {
+              sheetId: dashboardSheetId,
+              startRowIndex: 3,
+              endRowIndex: 4,
+              startColumnIndex: 1,
+              endColumnIndex: 2,
+            },
+            cell: {
+              userEnteredFormat: {
+                numberFormat: {
+                  type: 'PERCENT',
+                  pattern: '0.0%',
+                },
+              },
+            },
+            fields: 'userEnteredFormat.numberFormat',
+          },
+        },
+        {
+          repeatCell: {
+            range: {
+              sheetId: dashboardSheetId,
+              startRowIndex: 5,
+              endRowIndex: 6,
+              startColumnIndex: 1,
+              endColumnIndex: 2,
+            },
+            cell: {
+              userEnteredFormat: {
+                numberFormat: {
+                  type: 'PERCENT',
+                  pattern: '0.0%',
+                },
+              },
+            },
+            fields: 'userEnteredFormat.numberFormat',
+          },
+        },
+        {
+          updateDimensionProperties: {
+            range: {
+              sheetId: dashboardSheetId,
+              dimension: 'COLUMNS',
+              startIndex: 0,
+              endIndex: 1,
+            },
+            properties: {
+              pixelSize: 240,
+            },
+            fields: 'pixelSize',
+          },
+        },
+        {
+          updateDimensionProperties: {
+            range: {
+              sheetId: dashboardSheetId,
+              dimension: 'COLUMNS',
+              startIndex: 1,
+              endIndex: 2,
+            },
+            properties: {
+              pixelSize: 140,
+            },
+            fields: 'pixelSize',
+          },
+        },
+        {
+          updateDimensionProperties: {
+            range: {
+              sheetId: dashboardSheetId,
+              dimension: 'COLUMNS',
+              startIndex: 2,
+              endIndex: 3,
+            },
+            properties: {
+              pixelSize: 360,
+            },
+            fields: 'pixelSize',
+          },
+        }
+      );
+    }
+
     await batchUpdateSpreadsheet(spreadsheetId, requests, token);
+
+    if (typeof dashboardSheetId === 'number') {
+      await updateSheetValues(
+        spreadsheetId,
+        `${DASHBOARD_WORKSHEET_NAME}!A1:C${DASHBOARD_ROWS.length}`,
+        DASHBOARD_ROWS,
+        token
+      );
+    }
   }
 
   function columnLetterFromIndex(index) {
@@ -1197,6 +1405,7 @@
     setupSpreadsheetTemplate,
     shortenUrl,
     trimText,
+    updateSheetValues,
     updateSheetRow,
   };
 })();
