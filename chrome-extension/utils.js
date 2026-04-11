@@ -53,8 +53,8 @@
     ],
     [
       'Application Reply Count / 投遞回覆數',
-      `=SUMPRODUCT(--(LEN('${WORKSHEET_NAME}'!A2:A)>0),--(((LEN('${WORKSHEET_NAME}'!P2:P)>0)+(LEN('${WORKSHEET_NAME}'!R2:R)>0)+(LEN('${WORKSHEET_NAME}'!T2:T)>0)+(LEN('${WORKSHEET_NAME}'!U2:U)>0))>0))`,
-      'Applied rows where any interview date or final result has been recorded.',
+      `=SUMPRODUCT(--(LEN('${WORKSHEET_NAME}'!A2:A)>0),--(((LEN('${WORKSHEET_NAME}'!K2:K)>0)+('${WORKSHEET_NAME}'!L2:L="applied")+('${WORKSHEET_NAME}'!L2:L="interviewing")+('${WORKSHEET_NAME}'!L2:L="offer")+('${WORKSHEET_NAME}'!L2:L="rejected"))>0),--(((LEN('${WORKSHEET_NAME}'!P2:P)>0)+(LEN('${WORKSHEET_NAME}'!R2:R)>0)+(LEN('${WORKSHEET_NAME}'!T2:T)>0)+('${WORKSHEET_NAME}'!U2:U="Get offer")+('${WORKSHEET_NAME}'!U2:U="Reject"))>0))`,
+      'Applied rows where a company-side reply signal exists: any interview date, Get offer, or Reject.',
     ],
     [
       'Application Reply Rate / 投遞回覆率',
@@ -68,8 +68,8 @@
     ],
     [
       'Total Interest Count / 市場回應總數',
-      `=SUMPRODUCT(--(LEN('${WORKSHEET_NAME}'!A2:A)>0),--((('${WORKSHEET_NAME}'!C2:C="invited")+(LEN('${WORKSHEET_NAME}'!P2:P)>0)+(LEN('${WORKSHEET_NAME}'!R2:R)>0)+(LEN('${WORKSHEET_NAME}'!T2:T)>0)+(LEN('${WORKSHEET_NAME}'!U2:U)>0))>0))`,
-      'Unique rows that show either an inbound invite or an application-side reply signal.',
+      `=SUMPRODUCT(--(LEN('${WORKSHEET_NAME}'!A2:A)>0),--((('${WORKSHEET_NAME}'!C2:C="invited")+((((LEN('${WORKSHEET_NAME}'!K2:K)>0)+('${WORKSHEET_NAME}'!L2:L="applied")+('${WORKSHEET_NAME}'!L2:L="interviewing")+('${WORKSHEET_NAME}'!L2:L="offer")+('${WORKSHEET_NAME}'!L2:L="rejected"))>0)*(((LEN('${WORKSHEET_NAME}'!P2:P)>0)+(LEN('${WORKSHEET_NAME}'!R2:R)>0)+(LEN('${WORKSHEET_NAME}'!T2:T)>0)+('${WORKSHEET_NAME}'!U2:U="Get offer")+('${WORKSHEET_NAME}'!U2:U="Reject"))>0)))>0))`,
+      'Unique rows that show either an inbound invite or an application-side company reply signal.',
     ],
     [
       'Offer Count / Offer 數',
