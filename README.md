@@ -55,13 +55,16 @@ JD Saver creates a Google Sheet for the user during setup.
 The generated sheet includes:
 
 - worksheet name: `JD 收錄池`
+- dashboard worksheet: `Metrics / 指標總覽`
 - the required column order
 - frozen header row
 - default dropdown fields for the status columns
+- starter formulas for core application metrics
 
 Current worksheet name expected by the extension:
 
 - `JD 收錄池`
+- `Metrics / 指標總覽`
 
 Current column order used by the extension:
 
@@ -79,6 +82,16 @@ Current column order used by the extension:
 12. `Application Status / 投遞狀態`
 13. `Note / 備註`
 14. `Agent Queue / Agent 佇列`
+15. `關卡 1 類型`
+16. `關卡 1 日期`
+17. `關卡 2 類型`
+18. `關卡 2 日期`
+19. `關卡 3 類型`
+20. `關卡 3 日期`
+21. `Result 類型`
+
+The extension currently writes the first 14 columns directly. The later workflow columns are created by the template so the generated sheet is ready for manual tracking and downstream workflows.
+The generated dashboard worksheet includes starter metrics for applied count, application reply count, application reply rate, inbound invite count, total interest count, application offer count, total offer count, reject count, withdraw count, and offer rate among replied companies.
 
 ## Local Testing
 
@@ -167,13 +180,16 @@ JD Saver 會在設定流程中直接建立使用者自己的 Google Sheet。
 建立完成後會自動初始化：
 
 - 工作表名稱：`JD 收錄池`
+- 指標工作表：`Metrics / 指標總覽`
 - 必要欄位順序
 - 凍結標題列
 - 狀態欄位的預設下拉選單
+- 核心投遞指標的初始公式
 
 extension 目前預期使用的工作表名稱：
 
 - `JD 收錄池`
+- `Metrics / 指標總覽`
 
 extension 目前使用的欄位順序：
 
@@ -191,6 +207,16 @@ extension 目前使用的欄位順序：
 12. `Application Status / 投遞狀態`
 13. `Note / 備註`
 14. `Agent Queue / Agent 佇列`
+15. `關卡 1 類型`
+16. `關卡 1 日期`
+17. `關卡 2 類型`
+18. `關卡 2 日期`
+19. `關卡 3 類型`
+20. `關卡 3 日期`
+21. `Result 類型`
+
+目前 extension 直接寫入的是前 14 欄；後面的流程欄位會由 template 一起建立，方便後續手動追蹤與 downstream workflow 使用。
+新建表時也會一併建立指標工作表，先提供投遞數、投遞回覆數、投遞回覆率、主動邀約數、市場回應總數、投遞 Offer 數、總 Offer 數、被拒數、主動放棄數與回覆後 Offer 率的基礎公式。
 
 ## 本地測試方式
 
