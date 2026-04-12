@@ -72,9 +72,14 @@
       'Unique rows that show either an inbound invite or an application-side company reply signal.',
     ],
     [
-      'Offer Count / Offer 數',
+      'Application Offer Count / 投遞 Offer 數',
+      `=SUMPRODUCT(--(LEN('${WORKSHEET_NAME}'!A2:A)>0),--(((LEN('${WORKSHEET_NAME}'!K2:K)>0)+('${WORKSHEET_NAME}'!L2:L="applied")+('${WORKSHEET_NAME}'!L2:L="interviewing")+('${WORKSHEET_NAME}'!L2:L="offer")+('${WORKSHEET_NAME}'!L2:L="rejected"))>0),--('${WORKSHEET_NAME}'!U2:U="Get offer"))`,
+      'Applied rows where Result 類型 is "Get offer".',
+    ],
+    [
+      'Total Offer Count / 總 Offer 數',
       `=COUNTIFS('${WORKSHEET_NAME}'!A2:A,"<>",'${WORKSHEET_NAME}'!U2:U,"Get offer")`,
-      'Rows with a saved job URL where Result 類型 is "Get offer".',
+      'All rows with a saved job URL where Result 類型 is "Get offer".',
     ],
     [
       'Reject Count / 被拒數',
@@ -89,7 +94,7 @@
     [
       'Offer Rate (Application Reply) / Offer 率',
       '=IF(B3=0,0,B7/B3)',
-      'Offer Count / Application Reply Count',
+      'Application Offer Count / Application Reply Count',
     ],
   ];
 
@@ -1275,8 +1280,8 @@
           repeatCell: {
             range: {
               sheetId: dashboardSheetId,
-              startRowIndex: 9,
-              endRowIndex: 10,
+              startRowIndex: 10,
+              endRowIndex: 11,
               startColumnIndex: 1,
               endColumnIndex: 2,
             },

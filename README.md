@@ -91,7 +91,7 @@ Current column order used by the extension:
 21. `Result 類型`
 
 The extension currently writes the first 14 columns directly. The later workflow columns are created by the template so the generated sheet is ready for manual tracking and downstream workflows.
-The generated dashboard worksheet includes starter metrics for applied count, application reply count, application reply rate, inbound invite count, total interest count, offer count, reject count, withdraw count, and offer rate among replied companies.
+The generated dashboard worksheet includes starter metrics for applied count, application reply count, application reply rate, inbound invite count, total interest count, application offer count, total offer count, reject count, withdraw count, and offer rate among replied companies.
 
 ## Local Testing
 
@@ -216,7 +216,7 @@ extension 目前使用的欄位順序：
 21. `Result 類型`
 
 目前 extension 直接寫入的是前 14 欄；後面的流程欄位會由 template 一起建立，方便後續手動追蹤與 downstream workflow 使用。
-新建表時也會一併建立指標工作表，先提供投遞數、投遞回覆數、投遞回覆率、主動邀約數、市場回應總數、Offer 數、被拒數、主動放棄數與回覆後 Offer 率的基礎公式。
+新建表時也會一併建立指標工作表，先提供投遞數、投遞回覆數、投遞回覆率、主動邀約數、市場回應總數、投遞 Offer 數、總 Offer 數、被拒數、主動放棄數與回覆後 Offer 率的基礎公式。
 
 ## 本地測試方式
 
