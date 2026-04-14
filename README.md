@@ -4,6 +4,19 @@ Save the current job description page to your own Google Sheet.
 
 `JD Saver for Google Sheets` is a Chrome extension for people who want to collect job listings into a structured spreadsheet while browsing. It reads the current JD page, extracts key job information, and saves it into a Google Sheet owned by the user.
 
+## Available Now
+
+JD Saver is now live on the Chrome Web Store:
+
+- [Install JD Saver for Google Sheets](https://chromewebstore.google.com/detail/ipcamokmondmagfhndmifhdeldppekni?utm_source=item-share-cb)
+
+Highlights:
+
+- Save the current job page directly into your own Google Sheet
+- Generate a ready-to-use job tracking sheet with workflow columns and dashboard metrics
+- Support Google OAuth and Google Sheets API without requiring a separate backend
+- Support both English and Traditional Chinese
+
 This project is intentionally focused on one job:
 
 `JD page -> user-owned Google Sheet`
@@ -112,7 +125,7 @@ chrome-extension/
 
 ## Notes
 
-- This project is currently in MVP / pre-launch stage.
+- This project is now publicly available on the Chrome Web Store.
 - The current architecture is based on Google OAuth + Google Sheets API.
 - The Google Sheet is owned by the user, not by the extension author.
 - The extension currently does not include automated follow-up workflows.
@@ -124,6 +137,19 @@ chrome-extension/
 把你正在瀏覽的職缺頁面，一鍵存到你自己的 Google Sheet。
 
 `JD Saver for Google Sheets` 是一個 Chrome extension，適合想在瀏覽職缺時順手把 JD 收進試算表的人。它會讀取目前頁面的職缺內容、擷取主要欄位，並直接寫進使用者自己的 Google Sheet。
+
+## 現在可安裝
+
+JD Saver 已經正式上架到 Chrome Web Store：
+
+- [安裝 JD Saver for Google Sheets](https://chromewebstore.google.com/detail/ipcamokmondmagfhndmifhdeldppekni?utm_source=item-share-cb)
+
+這個 extension 目前的重點能力：
+
+- 將目前職缺頁面直接存進你自己的 Google Sheet
+- 自動建立帶有 workflow 欄位與 dashboard 指標的投遞追蹤表
+- 使用 Google OAuth 與 Google Sheets API，不需要另外架後端
+- 支援英文與繁體中文
 
 這個專案刻意只做一件事：
 
@@ -237,7 +263,7 @@ chrome-extension/
 
 ## 備註
 
-- 目前仍屬於 MVP / 上線前整理階段
+- 目前已正式上架到 Chrome Web Store
 - 當前架構為 Google OAuth + Google Sheets API
 - Google Sheet 是使用者自己的，不是 extension 作者代管
 - 目前不包含後續自動化工作流
