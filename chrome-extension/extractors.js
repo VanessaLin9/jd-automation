@@ -1,4 +1,16 @@
 (function () {
+  const COMPANY_TEXT_NOISE_PATTERNS = [
+    /推薦好公司/,
+    /為你推薦的好公司/,
+    /百萬年薪企業/,
+    /上市櫃/,
+    /外商公司/,
+    /科技園區/,
+    /半導體/,
+    /ai產業地圖/i,
+    /精選.+特輯/,
+  ];
+
   function firstNonEmpty(...values) {
     for (const value of values) {
       const text = cleanText(value);
@@ -87,6 +99,25 @@
         return text;
       }
     }
+    return '';
+  }
+
+  function isLikelyNoiseText(text) {
+    return COMPANY_TEXT_NOISE_PATTERNS.some((pattern) => pattern.test(text));
+  }
+
+  function firstMeaningfulText(selectors) {
+    for (const selector of selectors) {
+      const nodes = document.querySelectorAll(selector);
+      for (const node of nodes) {
+        const text = textFromNode(node);
+        if (!text || isLikelyNoiseText(text)) {
+          continue;
+        }
+        return text;
+      }
+    }
+
     return '';
   }
 
@@ -238,8 +269,14 @@
         cleanText(document.title)
       ),
       company: firstNonEmpty(
-        firstText(['.job-header__company', '.apply-job__company', 'a[href*="/company/"]']),
-        structured.company
+        structured.company,
+        firstMeaningfulText([
+          '.job-header__company',
+          '.apply-job__company',
+          '.job-header a[href*="/company/"]',
+          '.apply-job a[href*="/company/"]',
+          'a[href*="/company/"]',
+        ])
       ),
       industry: firstNonEmpty(
         firstText([
