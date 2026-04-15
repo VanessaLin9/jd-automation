@@ -11,6 +11,13 @@ The format is based on Keep a Changelog, with entries grouped by release version
 - Fixed incorrect company name extraction on Cake job pages.
 - Normalized source site labels so supported platforms are saved consistently in the spreadsheet.
 
+### Changed
+- Split the README into separate Traditional Chinese and English files.
+- Added language switch links at the top of both README files.
+
+### Added
+- Added this changelog to track release history in the repository.
+
 ## [0.1.1] - 2026-04-13
 
 ### Fixed
