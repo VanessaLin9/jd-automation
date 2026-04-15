@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog, with entries grouped by release version.
 
-## [0.1.2] - Unreleased
+## [0.1.2] - 2026-04-15
 
 ### Fixed
 - Fixed incorrect company name extraction on 104 job pages.

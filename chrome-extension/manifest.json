@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "JD Saver for Google Sheets",
   "description": "Save the current job description page to your own Google Sheet.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk0enmo7IzMTv8eefQy7FNCbCNGUHebukP0nAs1ZA/PsBKxGZFlwwa7uFgzoq3l699WXacHQGYryzEib+Ou3Olnvku1E04fiyqAHl3lpy2zAGLZ4QRW8BikLr1KFUf58MsVXsiDABu9siK7W9k0O4en+2Xmh3FkAoTl1sPLZtZF4ACLur74yjVarOYCvp19hhROfTBV1oLwoTWLeehA0Va0+CQey3ay6NiKdw+sE03e/Fbm9sY11b/DPMSJGcEOXVHIcd9zHUu+RZCCxrhyDUx6qkcIE39UaZgMv/T4uDMXXoy0dKcwSmuEHVzsj7rcxsGNKAl/SuS5wqK+nv1rSRKwIDAQAB",
   "permissions": [
     "activeTab",
