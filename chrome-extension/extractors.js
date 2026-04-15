@@ -1,4 +1,20 @@
 (function () {
+  const COMPANY_TEXT_NOISE_PATTERNS = [
+    /推薦好公司/,
+    /為你推薦的好公司/,
+    /您追蹤的/,
+    /刊登了一筆新職缺/,
+    /大約\s*\d+/,
+    /百萬年薪企業/,
+    /上市櫃/,
+    /外商公司/,
+    /科技園區/,
+    /半導體/,
+    /ai產業地圖/i,
+    /精選.+特輯/,
+  ];
+  const MAX_COMPANY_TEXT_LENGTH = 60;
+
   function firstNonEmpty(...values) {
     for (const value of values) {
       const text = cleanText(value);
@@ -90,6 +106,28 @@
     return '';
   }
 
+  function isLikelyNoiseText(text) {
+    return (
+      text.length > MAX_COMPANY_TEXT_LENGTH ||
+      COMPANY_TEXT_NOISE_PATTERNS.some((pattern) => pattern.test(text))
+    );
+  }
+
+  function firstMeaningfulText(selectors) {
+    for (const selector of selectors) {
+      const nodes = document.querySelectorAll(selector);
+      for (const node of nodes) {
+        const text = textFromNode(node);
+        if (!text || isLikelyNoiseText(text)) {
+          continue;
+        }
+        return text;
+      }
+    }
+
+    return '';
+  }
+
   function firstMainText(selectors) {
     for (const selector of selectors) {
       const node = document.querySelector(selector);
@@ -124,10 +162,16 @@
     if (hostname.includes('104.com.tw')) {
       return '104';
     }
-    if (hostname.includes('cakeresume.com')) {
-      return 'cakeresume';
+
+    if (isCakeSite(hostname)) {
+      return 'Cake';
     }
+
     return hostname.replace(/^www\./, '') || 'unknown';
+  }
+
+  function isCakeSite(hostname) {
+    return hostname.includes('cakeresume.com') || hostname === 'cake.me' || hostname.endsWith('.cake.me');
   }
 
   function toArray(value) {
@@ -238,8 +282,14 @@
         cleanText(document.title)
       ),
       company: firstNonEmpty(
-        firstText(['.job-header__company', '.apply-job__company', 'a[href*="/company/"]']),
-        structured.company
+        structured.company,
+        firstMeaningfulText([
+          '.job-header__company',
+          '.apply-job__company',
+          '.job-header a[href*="/company/"]',
+          '.apply-job a[href*="/company/"]',
+          'a[href*="/company/"]',
+        ])
       ),
       industry: firstNonEmpty(
         firstText([
@@ -288,7 +338,7 @@
     ]).join(' / ');
 
     return {
-      source_site: 'cakeresume',
+      source_site: detectSourceSite(location.hostname),
       job_url: location.href,
       job_title: firstNonEmpty(
         firstText(['h1', '[data-testid="job-title"]']),
@@ -296,8 +346,12 @@
         cleanText(document.title)
       ),
       company: firstNonEmpty(
-        firstText(['a[href*="/companies/"]', '[data-testid="company-name"]']),
-        structured.company
+        structured.company,
+        firstMeaningfulText([
+          '[data-testid="company-name"]',
+          'main a[href*="/companies/"]',
+          'a[href*="/companies/"]',
+        ])
       ),
       industry: firstNonEmpty(
         structured.industry,
@@ -369,7 +423,7 @@
       return extract104();
     }
 
-    if (hostname.includes('cakeresume.com')) {
+    if (isCakeSite(hostname)) {
       return extractCakeResume();
     }
 
