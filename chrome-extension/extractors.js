@@ -164,7 +164,7 @@
     }
 
     if (isCakeSite(hostname)) {
-      return 'cakeresume';
+      return 'Cake';
     }
 
     return hostname.replace(/^www\./, '') || 'unknown';
@@ -338,7 +338,7 @@
     ]).join(' / ');
 
     return {
-      source_site: 'cakeresume',
+      source_site: detectSourceSite(location.hostname),
       job_url: location.href,
       job_title: firstNonEmpty(
         firstText(['h1', '[data-testid="job-title"]']),
