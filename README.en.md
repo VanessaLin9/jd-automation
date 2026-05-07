@@ -111,6 +111,14 @@ The generated dashboard worksheet includes starter metrics for applied count, ap
 
 ## Local Testing
 
+Extractor fixture test:
+
+```sh
+node tests/extractors/run-fixtures.js
+```
+
+Extension smoke test:
+
 1. Open `chrome://extensions`
 2. Turn on `Developer mode`
 3. Choose `Load unpacked`

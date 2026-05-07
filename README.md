@@ -115,6 +115,14 @@ extension 目前使用的欄位順序：
 
 ## 本地測試方式
 
+Extractor fixture 測試：
+
+```sh
+node tests/extractors/run-fixtures.js
+```
+
+Extension smoke test：
+
 1. 打開 `chrome://extensions`
 2. 開啟 `Developer mode`
 3. 點選 `Load unpacked`

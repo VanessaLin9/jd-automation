@@ -1,4 +1,4 @@
-(function () {
+self.JDSaverExtractors = (() => {
   const COMPANY_TEXT_NOISE_PATTERNS = [
     /推薦好公司/,
     /為你推薦的好公司/,
@@ -173,31 +173,6 @@
   }
 
   function firstSectionTextAfterHeading(headingPatterns) {
-    const headings = Array.from(document.querySelectorAll('h2, h3, h4'));
-    const heading = headings.find((node) => {
-      const text = textFromNode(node).toLowerCase();
-      return headingPatterns.some((pattern) => pattern.test(text));
-    });
-
-    if (!heading) {
-      return firstVisibleTextSectionAfterHeading(headingPatterns);
-    }
-
-    const parts = [];
-    let current = heading.nextElementSibling;
-
-    while (current && !/^H[2-4]$/.test(current.tagName)) {
-      const text = textFromNode(current);
-      if (text) {
-        parts.push(text);
-      }
-      current = current.nextElementSibling;
-    }
-
-    return cleanMultilineText(parts.join('\n')) || firstVisibleTextSectionAfterHeading(headingPatterns);
-  }
-
-  function firstVisibleTextSectionAfterHeading(headingPatterns) {
     const lines = cleanMultilineText(document.body.innerText)
       .split('\n')
       .map(cleanText)
@@ -570,25 +545,31 @@
     };
   }
 
-  function extractJobData() {
-    const hostname = location.hostname;
+  const SITE_EXTRACTORS = [
+    {
+      matches: (hostname) => hostname.includes('104.com.tw'),
+      extract: extract104,
+    },
+    {
+      matches: isCakeSite,
+      extract: extractCakeResume,
+    },
+    {
+      matches: isYouratorSite,
+      extract: extractYourator,
+    },
+  ];
 
-    if (hostname.includes('104.com.tw')) {
-      return extract104();
-    }
-
-    if (isCakeSite(hostname)) {
-      return extractCakeResume();
-    }
-
-    if (isYouratorSite(hostname)) {
-      return extractYourator();
-    }
-
-    return extractGeneric();
+  function findSiteExtractor(hostname) {
+    const site = SITE_EXTRACTORS.find((entry) => entry.matches(hostname));
+    return site ? site.extract : extractGeneric;
   }
 
-  self.JDSaverExtractors = {
+  function extractJobData() {
+    return findSiteExtractor(location.hostname)();
+  }
+
+  return {
     extractJobData,
   };
 })();
