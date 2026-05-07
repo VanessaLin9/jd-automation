@@ -51,6 +51,7 @@ The current privacy policy for the extension is available here:
 - Support site-specific extraction for:
   - 104
   - CakeResume
+  - Yourator
 - Fall back to a generic extractor for other job pages
 
 ## How It Works

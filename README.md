@@ -55,6 +55,7 @@ JD Saver 已經正式上架到 Chrome Web Store：
 - 已針對以下網站做較佳擷取：
   - 104
   - CakeResume
+  - Yourator
 - 其他網站則使用 generic extractor
 
 ## 使用方式

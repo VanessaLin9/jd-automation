@@ -14,6 +14,20 @@
     /精選.+特輯/,
   ];
   const MAX_COMPANY_TEXT_LENGTH = 60;
+  const SECTION_STOP_HEADING_PATTERNS = [
+    /^job description$/i,
+    /^工作內容$/,
+    /^requirement$/i,
+    /^條件要求$/,
+    /^preferred qualifications$/i,
+    /^加分條件$/,
+    /^benefits$/i,
+    /^公司福利$/,
+    /^salary range$/i,
+    /^薪資/,
+    /^similar opportunities$/i,
+    /^推薦職缺$/,
+  ];
 
   function firstNonEmpty(...values) {
     for (const value of values) {
@@ -158,6 +172,63 @@
     return results;
   }
 
+  function firstSectionTextAfterHeading(headingPatterns) {
+    const headings = Array.from(document.querySelectorAll('h2, h3, h4'));
+    const heading = headings.find((node) => {
+      const text = textFromNode(node).toLowerCase();
+      return headingPatterns.some((pattern) => pattern.test(text));
+    });
+
+    if (!heading) {
+      return firstVisibleTextSectionAfterHeading(headingPatterns);
+    }
+
+    const parts = [];
+    let current = heading.nextElementSibling;
+
+    while (current && !/^H[2-4]$/.test(current.tagName)) {
+      const text = textFromNode(current);
+      if (text) {
+        parts.push(text);
+      }
+      current = current.nextElementSibling;
+    }
+
+    return cleanMultilineText(parts.join('\n')) || firstVisibleTextSectionAfterHeading(headingPatterns);
+  }
+
+  function firstVisibleTextSectionAfterHeading(headingPatterns) {
+    const lines = cleanMultilineText(document.body.innerText)
+      .split('\n')
+      .map(cleanText)
+      .filter(Boolean);
+    const startIndex = lines.findIndex((line) => {
+      const text = line.toLowerCase();
+      return headingPatterns.some((pattern) => pattern.test(text));
+    });
+
+    if (startIndex < 0) {
+      return '';
+    }
+
+    const parts = [];
+
+    for (let index = startIndex + 1; index < lines.length; index += 1) {
+      const line = lines[index];
+      if (SECTION_STOP_HEADING_PATTERNS.some((pattern) => pattern.test(line))) {
+        break;
+      }
+      parts.push(line);
+    }
+
+    return cleanMultilineText(parts.join('\n'));
+  }
+
+  function firstSectionLineAfterHeading(headingPatterns) {
+    const text = firstSectionTextAfterHeading(headingPatterns);
+    return cleanText(text.split('\n').find(Boolean) || text);
+  }
+
   function detectSourceSite(hostname) {
     if (hostname.includes('104.com.tw')) {
       return '104';
@@ -167,11 +238,19 @@
       return 'Cake';
     }
 
+    if (isYouratorSite(hostname)) {
+      return 'Yourator';
+    }
+
     return hostname.replace(/^www\./, '') || 'unknown';
   }
 
   function isCakeSite(hostname) {
     return hostname.includes('cakeresume.com') || hostname === 'cake.me' || hostname.endsWith('.cake.me');
+  }
+
+  function isYouratorSite(hostname) {
+    return hostname === 'yourator.co' || hostname.endsWith('.yourator.co');
   }
 
   function toArray(value) {
@@ -373,6 +452,81 @@
     };
   }
 
+  function extractYourator() {
+    const structured = readJobPostingData() || {};
+    const jobDescription = firstSectionTextAfterHeading([
+      /^job description$/,
+      /^工作內容$/,
+    ]);
+    const requirement = firstSectionTextAfterHeading([
+      /^requirement$/,
+      /^條件要求$/,
+    ]);
+    const preferredQualifications = firstSectionTextAfterHeading([
+      /^preferred qualifications$/,
+      /^加分條件$/,
+    ]);
+
+    return {
+      source_site: 'Yourator',
+      job_url: firstNonEmpty(structured.job_url, location.href),
+      job_title: firstNonEmpty(
+        firstText(['main h1', 'h1']),
+        structured.job_title,
+        cleanText(document.title)
+      ),
+      company: firstNonEmpty(
+        structured.company,
+        firstMeaningfulText([
+          'main a[href^="/companies/"]',
+          'main a[href*="yourator.co/companies/"]',
+          'a[href^="/companies/"][href*="/jobs/"]',
+          'a[href*="yourator.co/companies/"][href*="/jobs/"]',
+        ])
+      ),
+      industry: firstNonEmpty(
+        structured.industry,
+        collectTexts([
+          'main a[href*="/jobs?"]',
+          'main a[href*="keyword"]',
+          'main a[href*="tag"]',
+        ]).join(' / ')
+      ),
+      location: firstNonEmpty(
+        firstText([
+          'main a[href*="google.com/maps"]',
+          'main a[href*="maps.google"]',
+        ]),
+        structured.location,
+        firstText([
+          'main a[href*="/locations/"]',
+          'main a[href*="location"]',
+        ])
+      ),
+      salary_text: firstNonEmpty(
+        firstSectionLineAfterHeading([
+          /^salary range$/,
+          /^薪資/,
+        ]),
+        firstText([
+          'main [class*="salary"]',
+          'main [class*="Salary"]',
+        ]),
+        structured.salary_text
+      ),
+      jd_text: firstNonEmptySingleLine(
+        [
+          jobDescription,
+          requirement,
+          preferredQualifications,
+        ].filter(Boolean).join('\n\n'),
+        structured.jd_text,
+        firstMainText(['main', 'article', '[role="main"]']),
+        cleanMultilineText(document.body.innerText)
+      ),
+    };
+  }
+
   function extractGeneric() {
     const structured = readJobPostingData() || {};
 
@@ -425,6 +579,10 @@
 
     if (isCakeSite(hostname)) {
       return extractCakeResume();
+    }
+
+    if (isYouratorSite(hostname)) {
+      return extractYourator();
     }
 
     return extractGeneric();
