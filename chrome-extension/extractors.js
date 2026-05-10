@@ -61,6 +61,41 @@ self.JDSaverExtractors = (() => {
       .trim();
   }
 
+  function compactForComparison(value) {
+    return cleanText(value).replace(/\s+/g, '');
+  }
+
+  function compactAddressSegments(segments) {
+    const result = [];
+
+    for (const segment of segments.map(cleanText).filter(Boolean)) {
+      const compactSegment = compactForComparison(segment);
+      const compactResult = result.map(compactForComparison).join('');
+      const compactLast = compactForComparison(result[result.length - 1]);
+
+      if (compactResult && compactSegment.startsWith(compactResult)) {
+        result.splice(0, result.length, segment);
+        continue;
+      }
+
+      if (compactLast && (compactSegment === compactLast || compactSegment.startsWith(compactLast))) {
+        result[result.length - 1] = segment;
+        continue;
+      }
+
+      result.push(segment);
+    }
+
+    return result;
+  }
+
+  function normalizeAddressParts(parts) {
+    return compactAddressSegments(parts).join(' ');
+  }
+
+  function normalizeAddressText(value) {
+    return normalizeAddressParts(cleanText(value).split(/\s+/));
+  }
 
   function toSingleLineText(value) {
     return cleanMultilineText(value).replace(/\n+/g, ' | ');
@@ -287,11 +322,11 @@ self.JDSaverExtractors = (() => {
       const formattedLocations = rawLocations
         .map((location) => {
           const address = location && location.address ? location.address : {};
-          return [
+          return normalizeAddressParts([
             address.addressRegion,
             address.addressLocality,
             address.streetAddress,
-          ].map(cleanText).filter(Boolean).join(' ');
+          ]);
         })
         .filter(Boolean);
 
@@ -354,12 +389,12 @@ self.JDSaverExtractors = (() => {
         structured.industry
       ),
       location: firstNonEmpty(
-        firstText([
+        normalizeAddressText(firstText([
           '[data-qa-id="job-location"]',
           '.job-detail-job-condition a[href*="maps"]',
           '[class*="job-address"]',
           '[class*="address"]'
-        ]),
+        ])),
         structured.location
       ),
       salary_text: firstNonEmpty(
@@ -412,7 +447,7 @@ self.JDSaverExtractors = (() => {
         cakeIndustry
       ),
       location: firstNonEmpty(
-        firstText(['[data-testid="job-location"]']),
+        normalizeAddressText(firstText(['[data-testid="job-location"]'])),
         structured.location
       ),
       salary_text: firstNonEmpty(
@@ -468,15 +503,15 @@ self.JDSaverExtractors = (() => {
         ]).join(' / ')
       ),
       location: firstNonEmpty(
-        firstText([
+        normalizeAddressText(firstText([
           'main a[href*="google.com/maps"]',
           'main a[href*="maps.google"]',
-        ]),
+        ])),
         structured.location,
-        firstText([
+        normalizeAddressText(firstText([
           'main a[href*="/locations/"]',
           'main a[href*="location"]',
-        ])
+        ]))
       ),
       salary_text: firstNonEmpty(
         firstSectionLineAfterHeading([
@@ -524,10 +559,10 @@ self.JDSaverExtractors = (() => {
       ),
       industry: firstNonEmpty(structured.industry),
       location: firstNonEmpty(
-        firstText([
+        normalizeAddressText(firstText([
           '[data-testid="job-location"]',
           '[class*="location"]',
-        ]),
+        ])),
         structured.location
       ),
       salary_text: firstNonEmpty(

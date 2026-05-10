@@ -22,6 +22,9 @@ function createFixtureDocument({ bodyText, selectors, title }) {
     createElement() {
       return {
         innerHTML: '',
+        get value() {
+          return this.innerHTML;
+        },
         get textContent() {
           return this.innerHTML.replace(/<[^>]+>/g, '');
         },
@@ -63,7 +66,7 @@ function testYouratorFixture() {
     ['main a[href*="/jobs?"]', [node('SaaS'), node('Advertising Technology')]],
     ['main a[href*="keyword"]', []],
     ['main a[href*="tag"]', []],
-    ['main a[href*="google.com/maps"]', [node('台北市信義區信義路五段 7 號')]],
+    ['main a[href*="google.com/maps"]', [node('臺北市 臺北市 臺北市內湖區行愛路77巷16號4.7.8樓')]],
     ['main a[href*="maps.google"]', []],
     ['main a[href*="/locations/"]', []],
     ['main a[href*="location"]', []],
@@ -81,7 +84,7 @@ function testYouratorFixture() {
       Jobs
       Junior Frontend Engineer
       adGeek
-      台北市信義區信義路五段 7 號
+      臺北市 臺北市 臺北市內湖區行愛路77巷16號4.7.8樓
 
       Job Description
       Build user-facing product features.
@@ -117,7 +120,7 @@ function testYouratorFixture() {
   assert.equal(result.job_url, 'https://www.yourator.co/companies/adGeek/jobs/46357');
   assert.equal(result.job_title, 'Junior Frontend Engineer');
   assert.equal(result.company, 'adGeek');
-  assert.equal(result.location, '台北市信義區信義路五段 7 號');
+  assert.equal(result.location, '臺北市內湖區行愛路77巷16號4.7.8樓');
   assert.equal(result.salary_text, 'NT$ 45,000 - 70,000 / month');
   assert.equal(result.industry, 'SaaS / Advertising Technology');
   assert.match(result.jd_text, /Build user-facing product features/);
@@ -126,5 +129,65 @@ function testYouratorFixture() {
   assert.doesNotMatch(result.jd_text, /Benefits|年度旅遊|Salary Range|NT\$|Similar Opportunities/);
 }
 
+function testStructuredAddressDeduplication() {
+  const jobPosting = {
+    '@context': 'https://schema.org',
+    '@type': 'JobPosting',
+    title: 'Backend Engineer',
+    url: 'https://www.yourator.co/companies/example/jobs/123',
+    hiringOrganization: {
+      name: 'Example Co.',
+    },
+    jobLocation: {
+      '@type': 'Place',
+      address: {
+        '@type': 'PostalAddress',
+        addressRegion: '臺北市',
+        addressLocality: '臺北市',
+        streetAddress: '臺北市內湖區行愛路77巷16號4.7.8樓',
+      },
+    },
+    description: 'Build reliable backend systems.',
+  };
+  const document = createFixtureDocument({
+    title: 'Backend Engineer - Example Co. | Yourator',
+    selectors: new Map([
+      ['script[type="application/ld+json"]', [node(JSON.stringify(jobPosting))]],
+      ['main h1', []],
+      ['h1', []],
+      ['main a[href^="/companies/"]', []],
+      ['main a[href*="yourator.co/companies/"]', []],
+      ['a[href^="/companies/"][href*="/jobs/"]', []],
+      ['a[href*="yourator.co/companies/"][href*="/jobs/"]', []],
+      ['main a[href*="/jobs?"]', []],
+      ['main a[href*="keyword"]', []],
+      ['main a[href*="tag"]', []],
+      ['main a[href*="google.com/maps"]', []],
+      ['main a[href*="maps.google"]', []],
+      ['main a[href*="/locations/"]', []],
+      ['main a[href*="location"]', []],
+      ['main [class*="salary"]', []],
+      ['main [class*="Salary"]', []],
+      ['main', []],
+      ['article', []],
+      ['[role="main"]', []],
+    ]),
+    bodyText: 'Backend Engineer',
+  });
+
+  const result = runExtractor({
+    document,
+    location: {
+      hostname: 'www.yourator.co',
+      href: 'https://www.yourator.co/companies/example/jobs/123',
+    },
+  });
+
+  assert.equal(result.job_title, 'Backend Engineer');
+  assert.equal(result.company, 'Example Co.');
+  assert.equal(result.location, '臺北市內湖區行愛路77巷16號4.7.8樓');
+}
+
 testYouratorFixture();
+testStructuredAddressDeduplication();
 console.log('Extractor fixtures passed.');
